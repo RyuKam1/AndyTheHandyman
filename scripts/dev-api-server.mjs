@@ -28,6 +28,7 @@ async function start() {
     { default: relatedHandler },
     { default: categoriesHandler },
     { default: imageProxyHandler },
+    { default: healthHandler },
   ] =
     await Promise.all([
       import('../api/posts/index.js'),
@@ -35,6 +36,7 @@ async function start() {
       import('../api/posts/related.js'),
       import('../api/categories.js'),
       import('../api/image-proxy.js'),
+      import('../api/health.js'),
     ]);
 
   app.get('/api/posts/related', withHandler(relatedHandler));
@@ -44,6 +46,7 @@ async function start() {
   app.post('/api/posts', withHandler(postsHandler));
   app.get('/api/categories', withHandler(categoriesHandler));
   app.get('/api/image-proxy', withHandler(imageProxyHandler));
+  app.get('/api/health', withHandler(healthHandler));
 
   const server = app.listen(port, () => {
     console.log(`Local API server listening on http://localhost:${port}`);

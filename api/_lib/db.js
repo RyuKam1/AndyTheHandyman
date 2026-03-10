@@ -1,15 +1,20 @@
 import { neon } from '@neondatabase/serverless';
 
-const DATABASE_URL = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+const DATABASE_URL =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.HANDY_DATABASE_URL ||
+  process.env.HANDY_POSTGRES_URL ||
+  process.env.HANDY_POSTGRES_PRISMA_URL;
 
-if (!DATABASE_URL) {
-  throw new Error('Missing DATABASE_URL (or POSTGRES_URL) environment variable.');
-}
-
-export const sql = neon(DATABASE_URL);
+export const sql = DATABASE_URL ? neon(DATABASE_URL) : null;
 let schemaReadyPromise = null;
 
 export async function ensureSchema() {
+  if (!sql) {
+    throw new Error('DATABASE_URL/POSTGRES_URL is not configured on the server.');
+  }
+
   if (schemaReadyPromise) return schemaReadyPromise;
 
   schemaReadyPromise = (async () => {
@@ -44,4 +49,8 @@ export async function ensureSchema() {
   })();
 
   return schemaReadyPromise;
+}
+
+export function isDatabaseConfigured() {
+  return Boolean(DATABASE_URL);
 }

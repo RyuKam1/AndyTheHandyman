@@ -41,8 +41,10 @@ npm run dev:api
 
 - `GET /api/posts` - list posts (supports `category`, `query`, `sort`, `limit`)
 - `GET /api/posts/:slug` - get full post
+- `DELETE /api/posts/:slug` - delete post (requires `x-admin-key`)
 - `GET /api/posts/related` - related posts
 - `GET /api/categories` - categories list
+- `GET /api/health` - deployment database health check
 - `POST /api/posts` - create/update post (requires `x-admin-key`)
 
 ## Database optimization choices
