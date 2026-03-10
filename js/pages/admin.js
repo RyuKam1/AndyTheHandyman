@@ -9,10 +9,12 @@ import { slugify, uid, showToast } from '../utils/helpers.js';
 import { clearCache } from '../store.js';
 
 const ADMIN_KEY_STORAGE = 'ath_admin_api_key';
+const ADMIN_AUTH_STORAGE = 'ath_admin_auth';
 const ADMIN_DRAFT_STORAGE = 'ath_admin_draft_v1';
+const ADMIN_PAGE_PASSWORD = 'handyandy10010';
 
 let adminApiKey = sessionStorage.getItem(ADMIN_KEY_STORAGE) || '';
-let isAuthenticated = Boolean(adminApiKey);
+let isAuthenticated = sessionStorage.getItem(ADMIN_AUTH_STORAGE) === '1';
 let postData = createEmptyPost();
 let contentBlocks = [];
 let draggedIndex = null;
@@ -62,9 +64,9 @@ function renderLoginForm() {
       <div class="admin-login">
         <div style="font-size: 3rem; margin-bottom: var(--space-md);">🔐</div>
         <h2>Admin Access</h2>
-        <p>Enter your publishing API key to manage blog posts.</p>
+        <p>Enter your admin password to access the dashboard.</p>
         <div class="form-group">
-          <input type="password" class="form-input" id="admin-password" placeholder="Enter API key" />
+          <input type="password" class="form-input" id="admin-password" placeholder="Enter admin password" />
         </div>
         <button class="btn btn-primary btn-lg" id="admin-login-btn" style="width: 100%;">
           Sign In
@@ -83,13 +85,12 @@ function initLogin() {
   if (!btn) return;
 
   function attempt() {
-    if (input.value.trim().length >= 8) {
-      adminApiKey = input.value.trim();
-      sessionStorage.setItem(ADMIN_KEY_STORAGE, adminApiKey);
+    if (input.value === ADMIN_PAGE_PASSWORD) {
       isAuthenticated = true;
+      sessionStorage.setItem(ADMIN_AUTH_STORAGE, '1');
       renderAdminInPlace();
     } else {
-      error.textContent = 'Please enter a valid API key.';
+      error.textContent = 'Incorrect admin password.';
       error.style.display = 'block';
       input.value = '';
       input.focus();
@@ -161,6 +162,14 @@ function renderEditor() {
           </div>
 
           <h4 class="admin-tools-title" style="margin-top: var(--space-lg);">Actions</h4>
+          <input
+            type="password"
+            class="form-input form-input-sm"
+            id="admin-api-key-input"
+            value="${esc(adminApiKey)}"
+            placeholder="Publishing API key for save/delete"
+            style="margin-bottom: var(--space-sm);"
+          />
           <div class="admin-actions">
             <button class="btn btn-primary" id="btn-publish">🚀 Publish to Database</button>
             <button class="btn btn-primary" id="btn-export">💾 Export JSON</button>
@@ -328,8 +337,25 @@ function initEditor() {
   const cropApply = document.getElementById('image-crop-apply');
   const postsSearch = document.getElementById('admin-posts-search');
   const postsList = document.getElementById('admin-posts-list');
+  const adminApiKeyInput = document.getElementById('admin-api-key-input');
 
   if (!blockList) return;
+
+  function forceReauth(message = 'Invalid API key on server. Please sign in again.') {
+    sessionStorage.removeItem(ADMIN_KEY_STORAGE);
+    sessionStorage.removeItem(ADMIN_AUTH_STORAGE);
+    adminApiKey = '';
+    isAuthenticated = false;
+    showToast(`❌ ${message}`);
+    renderAdminInPlace();
+  }
+
+  if (adminApiKeyInput) {
+    adminApiKeyInput.addEventListener('input', () => {
+      adminApiKey = adminApiKeyInput.value.trim();
+      sessionStorage.setItem(ADMIN_KEY_STORAGE, adminApiKey);
+    });
+  }
 
   let cropNaturalWidth = 0;
   let cropNaturalHeight = 0;
@@ -672,6 +698,10 @@ function initEditor() {
         const slug = decodeURIComponent(deleteBtn.dataset.slug || '');
         if (!slug) return;
         if (!confirm(`Delete post "${slug}"? This cannot be undone.`)) return;
+        if (!adminApiKey) {
+          showToast('❌ Add your publishing API key first.');
+          return;
+        }
         try {
           const res = await fetch(`/api/posts/by-slug?slug=${encodeURIComponent(slug)}`, {
             method: 'DELETE',
@@ -684,6 +714,10 @@ function initEditor() {
               if (data?.error) msg = data.error;
             } catch {
               // keep fallback
+            }
+            if (res.status === 401) {
+              forceReauth('Invalid API key for delete action.');
+              return;
             }
             throw new Error(msg);
           }
@@ -1090,6 +1124,10 @@ function initEditor() {
       showToast('❌ Title is required before publishing.');
       return;
     }
+    if (!adminApiKey) {
+      showToast('❌ Add your publishing API key first.');
+      return;
+    }
 
     try {
       const res = await fetch('/api/posts', {
@@ -1108,6 +1146,10 @@ function initEditor() {
           if (data?.error) message = data.error;
         } catch {
           // Use fallback
+        }
+        if (res.status === 401) {
+          forceReauth('Invalid API key for publish action.');
+          return;
         }
         throw new Error(message);
       }
