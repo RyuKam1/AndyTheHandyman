@@ -1,22 +1,22 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { readdir, readFile } from 'node:fs/promises';
-import dotenv from 'dotenv';
-import { neon } from '@neondatabase/serverless';
-import { normalizeIncomingPost } from '../api/_lib/posts.js';
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { readdir, readFile } from "node:fs/promises";
+import dotenv from "dotenv";
+import { neon } from "@neondatabase/serverless";
+import { normalizeIncomingPost } from "../api/_lib/posts.js";
 
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: ".env.local" });
 
 const DATABASE_URL = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 if (!DATABASE_URL) {
-  throw new Error('Missing DATABASE_URL or POSTGRES_URL in .env.local');
+  throw new Error("Missing DATABASE_URL or POSTGRES_URL in .env.local");
 }
 
 const sql = neon(DATABASE_URL);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, '..');
-const postsDir = path.join(projectRoot, 'data', 'posts');
+const projectRoot = path.resolve(__dirname, "..");
+const postsDir = path.join(projectRoot, "data", "posts");
 
 async function ensureSchema() {
   await sql`
@@ -51,12 +51,12 @@ async function ensureSchema() {
 
 async function readPostFiles() {
   const files = await readdir(postsDir);
-  const jsonFiles = files.filter((name) => name.endsWith('.json'));
+  const jsonFiles = files.filter((name) => name.endsWith(".json"));
 
   const posts = [];
   for (const file of jsonFiles) {
     const fullPath = path.join(postsDir, file);
-    const raw = await readFile(fullPath, 'utf8');
+    const raw = await readFile(fullPath, "utf8");
     const data = JSON.parse(raw);
     posts.push(data);
   }
@@ -71,7 +71,7 @@ async function seed() {
   for (const source of posts) {
     const post = normalizeIncomingPost({
       ...source,
-      affiliateUrl: source.affiliateUrl || source.affiliateLink || '',
+      affiliateUrl: source.affiliateUrl || source.affiliateLink || "",
       featured: source.featured ?? null,
     });
 
@@ -83,7 +83,7 @@ async function seed() {
       )
       VALUES (
         ${post.slug}, ${post.title}, ${post.subtitle || null}, ${post.author}, ${post.category}, ${post.tags},
-        ${post.publishedOn}, ${post.coverImage || null}, ${post.excerpt || ''}, ${post.affiliateUrl || null},
+        ${post.publishedOn}, ${post.coverImage || null}, ${post.excerpt || ""}, ${post.affiliateUrl || null},
         ${post.affiliateButtonText || null}, ${post.seoTitle || null}, ${post.seoDescription || null},
         ${JSON.stringify(post.content)}, ${post.featuredRank}, now()
       )

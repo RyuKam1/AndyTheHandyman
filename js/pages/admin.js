@@ -3,42 +3,42 @@
  * Password-gated, supports all content block types with full customization.
  */
 
-import { renderBlogContent } from '../components/blogRenderer.js';
-import { updateMeta } from '../utils/seo.js';
-import { slugify, uid, showToast } from '../utils/helpers.js';
-import { clearCache } from '../store.js';
+import { renderBlogContent } from "../components/blogRenderer.js";
+import { updateMeta } from "../utils/seo.js";
+import { slugify, uid, showToast } from "../utils/helpers.js";
+import { clearCache } from "../store.js";
 
-const ADMIN_KEY_STORAGE = 'ath_admin_api_key';
-const ADMIN_AUTH_STORAGE = 'ath_admin_auth';
-const ADMIN_DRAFT_STORAGE = 'ath_admin_draft_v1';
-const ADMIN_PAGE_PASSWORD = 'handyandy10010';
+const ADMIN_KEY_STORAGE = "ath_admin_api_key";
+const ADMIN_AUTH_STORAGE = "ath_admin_auth";
+const ADMIN_DRAFT_STORAGE = "ath_admin_draft_v1";
+const ADMIN_PAGE_PASSWORD = "handyandy10010";
 
-let adminApiKey = sessionStorage.getItem(ADMIN_KEY_STORAGE) || '';
-let isAuthenticated = sessionStorage.getItem(ADMIN_AUTH_STORAGE) === '1';
+let adminApiKey = sessionStorage.getItem(ADMIN_KEY_STORAGE) || "";
+let isAuthenticated = sessionStorage.getItem(ADMIN_AUTH_STORAGE) === "1";
 let postData = createEmptyPost();
 let contentBlocks = [];
 let draggedIndex = null;
 let hasLoadedDraft = false;
-let coverImageSource = '';
+let coverImageSource = "";
 let coverCropState = { zoom: 1, offsetX: 0, offsetY: 0 };
 let libraryDragType = null;
 
 function createEmptyPost() {
   return {
-    slug: '',
-    title: '',
-    subtitle: '',
-    author: 'Andy',
-    category: '',
-    tags: '',
-    date: new Date().toISOString().split('T')[0],
-    coverImage: '',
-    excerpt: '',
-    featured: '',
-    affiliateUrl: '',
-    affiliateButtonText: 'Check Price & Availability',
-    seoTitle: '',
-    seoDescription: '',
+    slug: "",
+    title: "",
+    subtitle: "",
+    author: "Andy",
+    category: "",
+    tags: "",
+    date: new Date().toISOString().split("T")[0],
+    coverImage: "",
+    excerpt: "",
+    featured: "",
+    affiliateUrl: "",
+    affiliateButtonText: "Check Price & Availability",
+    seoTitle: "",
+    seoDescription: "",
   };
 }
 
@@ -46,7 +46,7 @@ function createEmptyPost() {
  * Render the admin page.
  */
 export async function renderAdminPage() {
-  updateMeta({ title: 'Admin CMS' });
+  updateMeta({ title: "Admin CMS" });
   hydrateDraftOnce();
 
   if (!isAuthenticated) {
@@ -78,33 +78,33 @@ function renderLoginForm() {
 }
 
 function initLogin() {
-  const btn = document.getElementById('admin-login-btn');
-  const input = document.getElementById('admin-password');
-  const error = document.getElementById('login-error');
+  const btn = document.getElementById("admin-login-btn");
+  const input = document.getElementById("admin-password");
+  const error = document.getElementById("login-error");
 
   if (!btn) return;
 
   function attempt() {
     if (input.value === ADMIN_PAGE_PASSWORD) {
       isAuthenticated = true;
-      sessionStorage.setItem(ADMIN_AUTH_STORAGE, '1');
+      sessionStorage.setItem(ADMIN_AUTH_STORAGE, "1");
       renderAdminInPlace();
     } else {
-      error.textContent = 'Incorrect admin password.';
-      error.style.display = 'block';
-      input.value = '';
+      error.textContent = "Incorrect admin password.";
+      error.style.display = "block";
+      input.value = "";
       input.focus();
     }
   }
 
-  btn.addEventListener('click', attempt);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') attempt();
+  btn.addEventListener("click", attempt);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") attempt();
   });
 }
 
 function renderAdminInPlace() {
-  const contentEl = document.querySelector('.page-content');
+  const contentEl = document.querySelector(".page-content");
   if (!contentEl) return;
   contentEl.innerHTML = isAuthenticated ? renderEditor() : renderLoginForm();
 }
@@ -119,11 +119,13 @@ function hydrateDraftOnce() {
     const parsed = JSON.parse(raw);
     if (parsed?.postData && parsed?.contentBlocks) {
       postData = { ...createEmptyPost(), ...parsed.postData };
-      contentBlocks = Array.isArray(parsed.contentBlocks) ? parsed.contentBlocks : [];
-      coverImageSource = postData.coverImage || '';
+      contentBlocks = Array.isArray(parsed.contentBlocks)
+        ? parsed.contentBlocks
+        : [];
+      coverImageSource = postData.coverImage || "";
     }
   } catch (error) {
-    console.warn('Admin: failed to restore draft from storage', error);
+    console.warn("Admin: failed to restore draft from storage", error);
   }
 }
 
@@ -131,10 +133,10 @@ function persistDraft() {
   try {
     localStorage.setItem(
       ADMIN_DRAFT_STORAGE,
-      JSON.stringify({ postData, contentBlocks })
+      JSON.stringify({ postData, contentBlocks }),
     );
   } catch (error) {
-    console.warn('Admin: failed to save draft to storage', error);
+    console.warn("Admin: failed to save draft to storage", error);
   }
 }
 
@@ -314,44 +316,49 @@ function renderEditor() {
 }
 
 function esc(str) {
-  if (!str) return '';
-  return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  if (!str) return "";
+  return str
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 function initEditor() {
-  const blockList = document.getElementById('block-list');
-  const previewContent = document.getElementById('preview-content');
-  const addBlockArea = document.querySelector('.add-block-area');
-  const coverUploadBtn = document.getElementById('btn-cover-upload');
-  const coverRecropBtn = document.getElementById('btn-cover-recrop');
-  const coverFileInput = document.getElementById('cover-image-file');
-  const coverImageField = document.getElementById('field-coverImage');
+  const blockList = document.getElementById("block-list");
+  const previewContent = document.getElementById("preview-content");
+  const addBlockArea = document.querySelector(".add-block-area");
+  const coverUploadBtn = document.getElementById("btn-cover-upload");
+  const coverRecropBtn = document.getElementById("btn-cover-recrop");
+  const coverFileInput = document.getElementById("cover-image-file");
+  const coverImageField = document.getElementById("field-coverImage");
 
-  const cropModal = document.getElementById('image-crop-modal');
-  const cropFrame = document.getElementById('image-crop-frame');
-  const cropImage = document.getElementById('image-crop-img');
-  const cropZoom = document.getElementById('image-crop-zoom');
-  const cropReset = document.getElementById('image-crop-reset');
-  const cropCancel = document.getElementById('image-crop-cancel');
-  const cropClose = document.getElementById('image-crop-close');
-  const cropApply = document.getElementById('image-crop-apply');
-  const postsSearch = document.getElementById('admin-posts-search');
-  const postsList = document.getElementById('admin-posts-list');
-  const adminApiKeyInput = document.getElementById('admin-api-key-input');
+  const cropModal = document.getElementById("image-crop-modal");
+  const cropFrame = document.getElementById("image-crop-frame");
+  const cropImage = document.getElementById("image-crop-img");
+  const cropZoom = document.getElementById("image-crop-zoom");
+  const cropReset = document.getElementById("image-crop-reset");
+  const cropCancel = document.getElementById("image-crop-cancel");
+  const cropClose = document.getElementById("image-crop-close");
+  const cropApply = document.getElementById("image-crop-apply");
+  const postsSearch = document.getElementById("admin-posts-search");
+  const postsList = document.getElementById("admin-posts-list");
+  const adminApiKeyInput = document.getElementById("admin-api-key-input");
 
   if (!blockList) return;
 
-  function forceReauth(message = 'Invalid API key on server. Please sign in again.') {
+  function forceReauth(
+    message = "Invalid API key on server. Please sign in again.",
+  ) {
     sessionStorage.removeItem(ADMIN_KEY_STORAGE);
     sessionStorage.removeItem(ADMIN_AUTH_STORAGE);
-    adminApiKey = '';
+    adminApiKey = "";
     isAuthenticated = false;
     showToast(`❌ ${message}`);
     renderAdminInPlace();
   }
 
   if (adminApiKeyInput) {
-    adminApiKeyInput.addEventListener('input', () => {
+    adminApiKeyInput.addEventListener("input", () => {
       adminApiKey = adminApiKeyInput.value.trim();
       sessionStorage.setItem(ADMIN_KEY_STORAGE, adminApiKey);
     });
@@ -377,8 +384,14 @@ function initEditor() {
     const drawH = cropNaturalHeight * cropBaseScale * coverCropState.zoom;
     const maxX = Math.max((drawW - frameW) / 2, 0);
     const maxY = Math.max((drawH - frameH) / 2, 0);
-    coverCropState.offsetX = Math.min(Math.max(coverCropState.offsetX, -maxX), maxX);
-    coverCropState.offsetY = Math.min(Math.max(coverCropState.offsetY, -maxY), maxY);
+    coverCropState.offsetX = Math.min(
+      Math.max(coverCropState.offsetX, -maxX),
+      maxX,
+    );
+    coverCropState.offsetY = Math.min(
+      Math.max(coverCropState.offsetY, -maxY),
+      maxY,
+    );
   }
 
   function renderCropImageTransform() {
@@ -390,25 +403,26 @@ function initEditor() {
 
   function resetCropState() {
     coverCropState = { zoom: 1, offsetX: 0, offsetY: 0 };
-    if (cropZoom) cropZoom.value = '1';
+    if (cropZoom) cropZoom.value = "1";
   }
 
   function isRemoteImageUrl(value) {
-    return /^https?:\/\//i.test((value || '').trim());
+    return /^https?:\/\//i.test((value || "").trim());
   }
 
   function blobToDataUrl(blob) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
-      reader.onerror = () => reject(new Error('Failed to read image blob.'));
+      reader.onload = () =>
+        resolve(typeof reader.result === "string" ? reader.result : "");
+      reader.onerror = () => reject(new Error("Failed to read image blob."));
       reader.readAsDataURL(blob);
     });
   }
 
   async function normalizeCropSource(source) {
-    const value = String(source || '').trim();
-    if (!value) throw new Error('No image source found.');
+    const value = String(source || "").trim();
+    if (!value) throw new Error("No image source found.");
     if (!isRemoteImageUrl(value)) return value;
 
     const proxiedUrl = `/api/image-proxy?url=${encodeURIComponent(value)}`;
@@ -429,9 +443,9 @@ function initEditor() {
 
   function closeCropper() {
     if (!cropModal) return;
-    cropModal.classList.remove('open');
-    cropModal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    cropModal.classList.remove("open");
+    cropModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
   }
 
   function openCropper(sourceUrl, useExistingTransform = false) {
@@ -447,24 +461,41 @@ function initEditor() {
       cropNaturalHeight = cropImage.naturalHeight;
       const frameW = cropFrame.clientWidth || 1;
       const frameH = cropFrame.clientHeight || 1;
-      cropBaseScale = Math.max(frameW / cropNaturalWidth, frameH / cropNaturalHeight);
+      cropBaseScale = Math.max(
+        frameW / cropNaturalWidth,
+        frameH / cropNaturalHeight,
+      );
       renderCropImageTransform();
     };
     cropImage.src = sourceUrl;
     cropZoom.value = String(coverCropState.zoom);
-    cropModal.classList.add('open');
-    cropModal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    cropModal.classList.add("open");
+    cropModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
   }
 
   // ---- Sync fields to postData ----
-  const fieldIds = ['title', 'subtitle', 'author', 'date', 'featured', 'category', 'tags', 'coverImage', 'excerpt', 'affiliateUrl', 'affiliateButtonText', 'seoTitle', 'seoDescription'];
-  fieldIds.forEach(id => {
+  const fieldIds = [
+    "title",
+    "subtitle",
+    "author",
+    "date",
+    "featured",
+    "category",
+    "tags",
+    "coverImage",
+    "excerpt",
+    "affiliateUrl",
+    "affiliateButtonText",
+    "seoTitle",
+    "seoDescription",
+  ];
+  fieldIds.forEach((id) => {
     const el = document.getElementById(`field-${id}`);
     if (el) {
-      el.addEventListener('input', () => {
+      el.addEventListener("input", () => {
         postData[id] = el.value;
-        if (id === 'coverImage') {
+        if (id === "coverImage") {
           coverImageSource = el.value.trim() || coverImageSource;
         }
         postData.slug = slugify(postData.title);
@@ -474,17 +505,18 @@ function initEditor() {
   });
 
   if (coverUploadBtn && coverFileInput) {
-    coverUploadBtn.addEventListener('click', () => {
-      coverFileInput.value = '';
+    coverUploadBtn.addEventListener("click", () => {
+      coverFileInput.value = "";
       coverFileInput.click();
     });
 
-    coverFileInput.addEventListener('change', (e) => {
+    coverFileInput.addEventListener("change", (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (ev) => {
-        const src = typeof ev.target?.result === 'string' ? ev.target.result : '';
+        const src =
+          typeof ev.target?.result === "string" ? ev.target.result : "";
         if (!src) return;
         coverImageSource = src;
         resetCropState();
@@ -495,14 +527,14 @@ function initEditor() {
   }
 
   if (coverRecropBtn) {
-    coverRecropBtn.addEventListener('click', async () => {
+    coverRecropBtn.addEventListener("click", async () => {
       const source = coverImageSource || postData.coverImage;
       if (!source) {
-        showToast('❌ Upload an image first to crop.');
+        showToast("❌ Upload an image first to crop.");
         return;
       }
       try {
-        showToast('⏳ Loading image for crop...');
+        showToast("⏳ Loading image for crop...");
         const normalized = await normalizeCropSource(source);
         coverImageSource = normalized;
         openCropper(normalized, true);
@@ -513,63 +545,68 @@ function initEditor() {
   }
 
   if (cropZoom) {
-    cropZoom.addEventListener('input', () => {
+    cropZoom.addEventListener("input", () => {
       coverCropState.zoom = Number.parseFloat(cropZoom.value) || 1;
       renderCropImageTransform();
     });
   }
 
   if (cropReset) {
-    cropReset.addEventListener('click', () => {
+    cropReset.addEventListener("click", () => {
       resetCropState();
       renderCropImageTransform();
     });
   }
 
   if (cropCancel) {
-    cropCancel.addEventListener('click', closeCropper);
+    cropCancel.addEventListener("click", closeCropper);
   }
 
   if (cropClose) {
-    cropClose.addEventListener('click', closeCropper);
+    cropClose.addEventListener("click", closeCropper);
   }
 
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && cropModal?.classList.contains('open')) {
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && cropModal?.classList.contains("open")) {
       closeCropper();
     }
   });
 
   if (cropFrame) {
-    cropFrame.addEventListener('mousedown', (e) => {
-      if (!cropModal?.classList.contains('open')) return;
+    cropFrame.addEventListener("mousedown", (e) => {
+      if (!cropModal?.classList.contains("open")) return;
       cropDragging = true;
       dragStartX = e.clientX;
       dragStartY = e.clientY;
       dragOriginX = coverCropState.offsetX;
       dragOriginY = coverCropState.offsetY;
-      cropFrame.classList.add('dragging');
+      cropFrame.classList.add("dragging");
     });
 
-    window.addEventListener('mousemove', (e) => {
+    window.addEventListener("mousemove", (e) => {
       if (!cropDragging) return;
       coverCropState.offsetX = dragOriginX + (e.clientX - dragStartX);
       coverCropState.offsetY = dragOriginY + (e.clientY - dragStartY);
       renderCropImageTransform();
     });
 
-    window.addEventListener('mouseup', () => {
+    window.addEventListener("mouseup", () => {
       if (!cropDragging) return;
       cropDragging = false;
-      cropFrame.classList.remove('dragging');
+      cropFrame.classList.remove("dragging");
     });
   }
 
   if (cropApply) {
-    cropApply.addEventListener('click', () => {
+    cropApply.addEventListener("click", () => {
       try {
-        if (!cropImage || !cropFrame || !cropNaturalWidth || !cropNaturalHeight) {
-          showToast('❌ No image loaded for cropping.');
+        if (
+          !cropImage ||
+          !cropFrame ||
+          !cropNaturalWidth ||
+          !cropNaturalHeight
+        ) {
+          showToast("❌ No image loaded for cropping.");
           return;
         }
 
@@ -597,19 +634,19 @@ function initEditor() {
         sw = Math.max(1, Math.min(sw, cropNaturalWidth));
         sh = Math.max(1, Math.min(sh, cropNaturalHeight));
 
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
         canvas.width = outputW;
         canvas.height = outputH;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext("2d");
         if (!ctx) {
-          showToast('❌ Failed to process image crop.');
+          showToast("❌ Failed to process image crop.");
           return;
         }
 
         ctx.drawImage(cropImage, sx, sy, sw, sh, 0, 0, outputW, outputH);
-        const cropped = canvas.toDataURL('image/jpeg', 0.82);
-        if (!cropped || !cropped.startsWith('data:image/')) {
-          throw new Error('Crop export failed.');
+        const cropped = canvas.toDataURL("image/jpeg", 0.82);
+        if (!cropped || !cropped.startsWith("data:image/")) {
+          throw new Error("Crop export failed.");
         }
 
         postData.coverImage = cropped;
@@ -617,36 +654,38 @@ function initEditor() {
         if (coverImageField) coverImageField.value = cropped;
         updatePreview();
         closeCropper();
-        showToast('✅ Cover image cropped.');
+        showToast("✅ Cover image cropped.");
       } catch (error) {
-        console.error('Crop apply failed:', error);
-        showToast('❌ Crop failed. For external URLs, upload the image file first, then crop.');
+        console.error("Crop apply failed:", error);
+        showToast(
+          "❌ Crop failed. For external URLs, upload the image file first, then crop.",
+        );
       }
     });
   }
 
   // ---- Add blocks ----
   if (addBlockArea) {
-    addBlockArea.querySelectorAll('.add-block-btn').forEach((btn) => {
-      btn.addEventListener('dragstart', (e) => {
+    addBlockArea.querySelectorAll(".add-block-btn").forEach((btn) => {
+      btn.addEventListener("dragstart", (e) => {
         libraryDragType = btn.dataset.type || null;
-        btn.classList.add('dragging');
+        btn.classList.add("dragging");
         if (e.dataTransfer) {
-          e.dataTransfer.effectAllowed = 'copy';
-          e.dataTransfer.setData('text/plain', libraryDragType || '');
+          e.dataTransfer.effectAllowed = "copy";
+          e.dataTransfer.setData("text/plain", libraryDragType || "");
         }
       });
 
-      btn.addEventListener('dragend', () => {
+      btn.addEventListener("dragend", () => {
         libraryDragType = null;
         libraryDropIndex = null;
-        btn.classList.remove('dragging');
+        btn.classList.remove("dragging");
         clearLibraryDropIndicator();
       });
     });
 
-    addBlockArea.addEventListener('click', (e) => {
-      const btn = e.target.closest('.add-block-btn');
+    addBlockArea.addEventListener("click", (e) => {
+      const btn = e.target.closest(".add-block-btn");
       if (!btn) return;
       const type = btn.dataset.type;
       contentBlocks.push(createBlock(type));
@@ -656,24 +695,26 @@ function initEditor() {
   }
 
   if (postsSearch) {
-    postsSearch.addEventListener('input', () => {
+    postsSearch.addEventListener("input", () => {
       clearTimeout(postsSearchTimer);
       postsSearchTimer = setTimeout(() => {
-        refreshPostsManager(postsSearch.value || '');
+        refreshPostsManager(postsSearch.value || "");
       }, 220);
     });
   }
 
   if (postsList) {
-    postsList.addEventListener('click', async (e) => {
-      const editBtn = e.target.closest('.admin-post-edit');
-      const deleteBtn = e.target.closest('.admin-post-delete');
+    postsList.addEventListener("click", async (e) => {
+      const editBtn = e.target.closest(".admin-post-edit");
+      const deleteBtn = e.target.closest(".admin-post-delete");
 
       if (editBtn) {
-        const slug = decodeURIComponent(editBtn.dataset.slug || '');
+        const slug = decodeURIComponent(editBtn.dataset.slug || "");
         if (!slug) return;
         try {
-          const res = await fetch(`/api/posts/by-slug?slug=${encodeURIComponent(slug)}`);
+          const res = await fetch(
+            `/api/posts/by-slug?slug=${encodeURIComponent(slug)}`,
+          );
           if (!res.ok) {
             let message = `Failed to load post (${res.status})`;
             const txt = await res.text();
@@ -681,7 +722,9 @@ function initEditor() {
               const parsed = JSON.parse(txt);
               if (parsed?.error) message = parsed.error;
             } catch {
-              if (txt.includes('<!DOCTYPE')) message = 'API returned HTML instead of JSON. Check Vercel routing for /api/*.';
+              if (txt.includes("<!DOCTYPE"))
+                message =
+                  "API returned HTML instead of JSON. Check Vercel routing for /api/*.";
             }
             throw new Error(message);
           }
@@ -689,24 +732,27 @@ function initEditor() {
           loadPostData(data);
           showToast(`✏️ Editing: ${data.title || slug}`);
         } catch (error) {
-          showToast(`❌ ${error.message || 'Failed to load post'}`);
+          showToast(`❌ ${error.message || "Failed to load post"}`);
         }
         return;
       }
 
       if (deleteBtn) {
-        const slug = decodeURIComponent(deleteBtn.dataset.slug || '');
+        const slug = decodeURIComponent(deleteBtn.dataset.slug || "");
         if (!slug) return;
         if (!confirm(`Delete post "${slug}"? This cannot be undone.`)) return;
         if (!adminApiKey) {
-          showToast('❌ Add your publishing API key first.');
+          showToast("❌ Add your publishing API key first.");
           return;
         }
         try {
-          const res = await fetch(`/api/posts/by-slug?slug=${encodeURIComponent(slug)}`, {
-            method: 'DELETE',
-            headers: { 'x-admin-key': adminApiKey },
-          });
+          const res = await fetch(
+            `/api/posts/by-slug?slug=${encodeURIComponent(slug)}`,
+            {
+              method: "DELETE",
+              headers: { "x-admin-key": adminApiKey },
+            },
+          );
           if (!res.ok) {
             let msg = `Failed to delete (${res.status})`;
             try {
@@ -716,22 +762,22 @@ function initEditor() {
               // keep fallback
             }
             if (res.status === 401) {
-              forceReauth('Invalid API key for delete action.');
+              forceReauth("Invalid API key for delete action.");
               return;
             }
             throw new Error(msg);
           }
           clearCache();
-          showToast('🗑️ Post deleted');
-          await refreshPostsManager(postsSearch?.value || '');
+          showToast("🗑️ Post deleted");
+          await refreshPostsManager(postsSearch?.value || "");
           if ((postData.slug || slugify(postData.title)) === slug) {
             postData = createEmptyPost();
             contentBlocks = [];
-            coverImageSource = '';
+            coverImageSource = "";
             renderAdminInPlace();
           }
         } catch (error) {
-          showToast(`❌ ${error.message || 'Delete failed'}`);
+          showToast(`❌ ${error.message || "Delete failed"}`);
         }
       }
     });
@@ -739,12 +785,14 @@ function initEditor() {
 
   // ---- Render blocks ----
   function renderBlocks() {
-    blockList.innerHTML = contentBlocks.map((block, i) => renderBlockEditor(block, i)).join('');
+    blockList.innerHTML = contentBlocks
+      .map((block, i) => renderBlockEditor(block, i))
+      .join("");
     attachBlockEvents();
   }
 
   function getDropInsertIndex(e) {
-    const targetItem = e.target.closest('.block-item');
+    const targetItem = e.target.closest(".block-item");
     if (!targetItem) return contentBlocks.length;
     const idx = parseInt(targetItem.dataset.index, 10);
     const rect = targetItem.getBoundingClientRect();
@@ -752,7 +800,7 @@ function initEditor() {
   }
 
   function getInsertIndexFromPointer(clientY) {
-    const items = Array.from(blockList.querySelectorAll('.block-item'));
+    const items = Array.from(blockList.querySelectorAll(".block-item"));
     if (!items.length) return 0;
     for (let i = 0; i < items.length; i += 1) {
       const rect = items[i].getBoundingClientRect();
@@ -762,17 +810,23 @@ function initEditor() {
   }
 
   function clearLinkedSelection() {
-    blockList.querySelectorAll('.block-item.linked-selected').forEach((el) => el.classList.remove('linked-selected'));
-    previewContent?.querySelectorAll('.preview-block-anchor.linked-selected').forEach((el) => el.classList.remove('linked-selected'));
+    blockList
+      .querySelectorAll(".block-item.linked-selected")
+      .forEach((el) => el.classList.remove("linked-selected"));
+    previewContent
+      ?.querySelectorAll(".preview-block-anchor.linked-selected")
+      .forEach((el) => el.classList.remove("linked-selected"));
   }
 
-  function renderPostsManager(items = [], query = '') {
+  function renderPostsManager(items = [], query = "") {
     if (!postsList) return;
     if (!items.length) {
-      postsList.innerHTML = `<p class="form-help">No posts found${query ? ` for "${esc(query)}"` : ''}.</p>`;
+      postsList.innerHTML = `<p class="form-help">No posts found${query ? ` for "${esc(query)}"` : ""}.</p>`;
       return;
     }
-    postsList.innerHTML = items.map((post) => `
+    postsList.innerHTML = items
+      .map(
+        (post) => `
       <div class="admin-post-row">
         <div class="admin-post-meta">
           <strong>${esc(post.title || post.slug)}</strong>
@@ -783,70 +837,74 @@ function initEditor() {
           <button class="btn btn-outline btn-sm admin-post-delete" data-slug="${encodeURIComponent(post.slug)}" style="color: var(--color-danger);">Delete</button>
         </div>
       </div>
-    `).join('');
+    `,
+      )
+      .join("");
   }
 
-  async function refreshPostsManager(searchQuery = '') {
+  async function refreshPostsManager(searchQuery = "") {
     if (!postsList) return;
     try {
-      const params = new URLSearchParams({ limit: '100', sort: 'newest' });
-      if (searchQuery.trim()) params.set('query', searchQuery.trim());
+      const params = new URLSearchParams({ limit: "100", sort: "newest" });
+      if (searchQuery.trim()) params.set("query", searchQuery.trim());
       const res = await fetch(`/api/posts?${params.toString()}`);
       if (!res.ok) throw new Error(`Failed to load posts (${res.status})`);
       const items = await res.json();
       renderPostsManager(Array.isArray(items) ? items : [], searchQuery);
     } catch (error) {
-      postsList.innerHTML = `<p class="form-help" style="color: var(--color-danger);">${esc(error.message || 'Failed to load posts')}</p>`;
+      postsList.innerHTML = `<p class="form-help" style="color: var(--color-danger);">${esc(error.message || "Failed to load posts")}</p>`;
     }
   }
 
   function focusEditorBlock(index) {
-    const blockEl = blockList.querySelector(`.block-item[data-index="${index}"]`);
+    const blockEl = blockList.querySelector(
+      `.block-item[data-index="${index}"]`,
+    );
     if (!blockEl) return;
     clearLinkedSelection();
-    blockEl.classList.add('linked-selected');
-    blockEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    const firstField = blockEl.querySelector('input, textarea, select');
+    blockEl.classList.add("linked-selected");
+    blockEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    const firstField = blockEl.querySelector("input, textarea, select");
     if (firstField) {
       setTimeout(() => firstField.focus(), 180);
     }
   }
 
   function showLibraryDropIndicator(insertIndex) {
-    blockList.querySelectorAll('.block-item').forEach((el) => {
-      el.classList.remove('insert-before');
-      el.classList.remove('insert-after');
+    blockList.querySelectorAll(".block-item").forEach((el) => {
+      el.classList.remove("insert-before");
+      el.classList.remove("insert-after");
     });
 
-    const items = Array.from(blockList.querySelectorAll('.block-item'));
+    const items = Array.from(blockList.querySelectorAll(".block-item"));
     if (!items.length) {
-      blockList.classList.add('insert-empty');
+      blockList.classList.add("insert-empty");
       return;
     }
 
-    blockList.classList.remove('insert-empty');
+    blockList.classList.remove("insert-empty");
     if (insertIndex <= 0) {
-      items[0].classList.add('insert-before');
+      items[0].classList.add("insert-before");
     } else if (insertIndex >= items.length) {
-      items[items.length - 1].classList.add('insert-after');
+      items[items.length - 1].classList.add("insert-after");
     } else {
-      items[insertIndex].classList.add('insert-before');
+      items[insertIndex].classList.add("insert-before");
     }
   }
 
   function clearLibraryDropIndicator() {
-    blockList.classList.remove('insert-empty');
-    blockList.classList.remove('library-drop-active');
-    blockList.querySelectorAll('.block-item').forEach((el) => {
-      el.classList.remove('insert-before');
-      el.classList.remove('insert-after');
+    blockList.classList.remove("insert-empty");
+    blockList.classList.remove("library-drop-active");
+    blockList.querySelectorAll(".block-item").forEach((el) => {
+      el.classList.remove("insert-before");
+      el.classList.remove("insert-after");
     });
   }
 
   function attachBlockEvents() {
     // Delete buttons
-    blockList.querySelectorAll('.block-delete').forEach(btn => {
-      btn.addEventListener('click', () => {
+    blockList.querySelectorAll(".block-delete").forEach((btn) => {
+      btn.addEventListener("click", () => {
         const idx = parseInt(btn.dataset.index);
         contentBlocks.splice(idx, 1);
         renderBlocks();
@@ -854,21 +912,23 @@ function initEditor() {
       });
     });
 
-    blockList.querySelectorAll('.block-insert-trigger').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+    blockList.querySelectorAll(".block-insert-trigger").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const idx = btn.dataset.index;
-        const menu = blockList.querySelector(`.block-insert-menu[data-index="${idx}"]`);
+        const menu = blockList.querySelector(
+          `.block-insert-menu[data-index="${idx}"]`,
+        );
         if (!menu) return;
-        blockList.querySelectorAll('.block-insert-menu').forEach((m) => {
-          if (m !== menu) m.classList.remove('open');
+        blockList.querySelectorAll(".block-insert-menu").forEach((m) => {
+          if (m !== menu) m.classList.remove("open");
         });
-        menu.classList.toggle('open');
+        menu.classList.toggle("open");
       });
     });
 
-    blockList.querySelectorAll('.block-insert-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
+    blockList.querySelectorAll(".block-insert-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
         const insertAfter = parseInt(btn.dataset.insertIndex, 10);
         const type = btn.dataset.type;
         if (Number.isNaN(insertAfter) || !type) return;
@@ -879,22 +939,28 @@ function initEditor() {
     });
 
     // Move up/down
-    blockList.querySelectorAll('.block-move-up').forEach(btn => {
-      btn.addEventListener('click', () => {
+    blockList.querySelectorAll(".block-move-up").forEach((btn) => {
+      btn.addEventListener("click", () => {
         const idx = parseInt(btn.dataset.index);
         if (idx > 0) {
-          [contentBlocks[idx - 1], contentBlocks[idx]] = [contentBlocks[idx], contentBlocks[idx - 1]];
+          [contentBlocks[idx - 1], contentBlocks[idx]] = [
+            contentBlocks[idx],
+            contentBlocks[idx - 1],
+          ];
           renderBlocks();
           updatePreview();
         }
       });
     });
 
-    blockList.querySelectorAll('.block-move-down').forEach(btn => {
-      btn.addEventListener('click', () => {
+    blockList.querySelectorAll(".block-move-down").forEach((btn) => {
+      btn.addEventListener("click", () => {
         const idx = parseInt(btn.dataset.index);
         if (idx < contentBlocks.length - 1) {
-          [contentBlocks[idx], contentBlocks[idx + 1]] = [contentBlocks[idx + 1], contentBlocks[idx]];
+          [contentBlocks[idx], contentBlocks[idx + 1]] = [
+            contentBlocks[idx + 1],
+            contentBlocks[idx],
+          ];
           renderBlocks();
           updatePreview();
         }
@@ -902,8 +968,8 @@ function initEditor() {
     });
 
     // Input changes
-    blockList.querySelectorAll('[data-block-field]').forEach(input => {
-      input.addEventListener('input', () => {
+    blockList.querySelectorAll("[data-block-field]").forEach((input) => {
+      input.addEventListener("input", () => {
         const idx = parseInt(input.dataset.blockIndex);
         const field = input.dataset.blockField;
         contentBlocks[idx][field] = input.value;
@@ -912,41 +978,46 @@ function initEditor() {
     });
 
     // Drag & drop
-    blockList.querySelectorAll('.block-item').forEach((item) => {
-      item.addEventListener('dragstart', (e) => {
+    blockList.querySelectorAll(".block-item").forEach((item) => {
+      item.addEventListener("dragstart", (e) => {
         draggedIndex = parseInt(item.dataset.index);
-        item.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
+        item.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
       });
 
-      item.addEventListener('dragend', () => {
-        item.classList.remove('dragging');
-        blockList.querySelectorAll('.block-item').forEach(el => el.classList.remove('drop-target'));
+      item.addEventListener("dragend", () => {
+        item.classList.remove("dragging");
+        blockList
+          .querySelectorAll(".block-item")
+          .forEach((el) => el.classList.remove("drop-target"));
         draggedIndex = null;
       });
 
-      item.addEventListener('dragover', (e) => {
+      item.addEventListener("dragover", (e) => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = libraryDragType ? 'copy' : 'move';
+        e.dataTransfer.dropEffect = libraryDragType ? "copy" : "move";
         if (libraryDragType) {
           libraryDropIndex = getInsertIndexFromPointer(e.clientY);
           showLibraryDropIndicator(libraryDropIndex);
         }
       });
 
-      item.addEventListener('dragenter', () => {
-        if (draggedIndex !== null && draggedIndex !== parseInt(item.dataset.index, 10)) {
-          item.classList.add('drop-target');
+      item.addEventListener("dragenter", () => {
+        if (
+          draggedIndex !== null &&
+          draggedIndex !== parseInt(item.dataset.index, 10)
+        ) {
+          item.classList.add("drop-target");
         }
       });
 
-      item.addEventListener('dragleave', () => {
-        item.classList.remove('drop-target');
+      item.addEventListener("dragleave", () => {
+        item.classList.remove("drop-target");
       });
 
-      item.addEventListener('drop', (e) => {
+      item.addEventListener("drop", (e) => {
         e.preventDefault();
-        item.classList.remove('drop-target');
+        item.classList.remove("drop-target");
         if (libraryDragType) {
           const insertIdx = libraryDropIndex ?? getDropInsertIndex(e);
           contentBlocks.splice(insertIdx, 0, createBlock(libraryDragType));
@@ -967,29 +1038,31 @@ function initEditor() {
     });
 
     if (!insertMenuEventsBound) {
-      document.addEventListener('click', () => {
-        blockList.querySelectorAll('.block-insert-menu').forEach((m) => m.classList.remove('open'));
+      document.addEventListener("click", () => {
+        blockList
+          .querySelectorAll(".block-insert-menu")
+          .forEach((m) => m.classList.remove("open"));
       });
       insertMenuEventsBound = true;
     }
 
-    blockList.querySelectorAll('.block-insert-menu').forEach((menu) => {
-      menu.addEventListener('click', (e) => e.stopPropagation());
+    blockList.querySelectorAll(".block-insert-menu").forEach((menu) => {
+      menu.addEventListener("click", (e) => e.stopPropagation());
     });
 
     // List item management
-    blockList.querySelectorAll('.list-add-item').forEach(btn => {
-      btn.addEventListener('click', () => {
+    blockList.querySelectorAll(".list-add-item").forEach((btn) => {
+      btn.addEventListener("click", () => {
         const idx = parseInt(btn.dataset.blockIndex);
         if (!contentBlocks[idx].items) contentBlocks[idx].items = [];
-        contentBlocks[idx].items.push('');
+        contentBlocks[idx].items.push("");
         renderBlocks();
         updatePreview();
       });
     });
 
-    blockList.querySelectorAll('.list-remove-item').forEach(btn => {
-      btn.addEventListener('click', () => {
+    blockList.querySelectorAll(".list-remove-item").forEach((btn) => {
+      btn.addEventListener("click", () => {
         const blockIdx = parseInt(btn.dataset.blockIndex);
         const itemIdx = parseInt(btn.dataset.itemIndex);
         contentBlocks[blockIdx].items.splice(itemIdx, 1);
@@ -998,8 +1071,8 @@ function initEditor() {
       });
     });
 
-    blockList.querySelectorAll('[data-list-item]').forEach(input => {
-      input.addEventListener('input', () => {
+    blockList.querySelectorAll("[data-list-item]").forEach((input) => {
+      input.addEventListener("input", () => {
         const blockIdx = parseInt(input.dataset.blockIndex);
         const itemIdx = parseInt(input.dataset.itemIndex);
         contentBlocks[blockIdx].items[itemIdx] = input.value;
@@ -1008,19 +1081,19 @@ function initEditor() {
     });
 
     // Pros/cons item management
-    blockList.querySelectorAll('.proscons-add').forEach(btn => {
-      btn.addEventListener('click', () => {
+    blockList.querySelectorAll(".proscons-add").forEach((btn) => {
+      btn.addEventListener("click", () => {
         const idx = parseInt(btn.dataset.blockIndex);
         const list = btn.dataset.list; // 'pros' or 'cons'
         if (!contentBlocks[idx][list]) contentBlocks[idx][list] = [];
-        contentBlocks[idx][list].push('');
+        contentBlocks[idx][list].push("");
         renderBlocks();
         updatePreview();
       });
     });
 
-    blockList.querySelectorAll('.proscons-remove').forEach(btn => {
-      btn.addEventListener('click', () => {
+    blockList.querySelectorAll(".proscons-remove").forEach((btn) => {
+      btn.addEventListener("click", () => {
         const blockIdx = parseInt(btn.dataset.blockIndex);
         const list = btn.dataset.list;
         const itemIdx = parseInt(btn.dataset.itemIndex);
@@ -1030,8 +1103,8 @@ function initEditor() {
       });
     });
 
-    blockList.querySelectorAll('[data-proscons-item]').forEach(input => {
-      input.addEventListener('input', () => {
+    blockList.querySelectorAll("[data-proscons-item]").forEach((input) => {
+      input.addEventListener("input", () => {
         const blockIdx = parseInt(input.dataset.blockIndex);
         const list = input.dataset.list;
         const itemIdx = parseInt(input.dataset.itemIndex);
@@ -1041,15 +1114,15 @@ function initEditor() {
     });
   }
 
-  blockList.addEventListener('dragover', (e) => {
+  blockList.addEventListener("dragover", (e) => {
     if (!libraryDragType) return;
     e.preventDefault();
-    blockList.classList.add('library-drop-active');
+    blockList.classList.add("library-drop-active");
     libraryDropIndex = getInsertIndexFromPointer(e.clientY);
     showLibraryDropIndicator(libraryDropIndex);
   });
 
-  blockList.addEventListener('dragleave', (e) => {
+  blockList.addEventListener("dragleave", (e) => {
     if (!libraryDragType) return;
     if (!blockList.contains(e.relatedTarget)) {
       libraryDropIndex = null;
@@ -1057,7 +1130,7 @@ function initEditor() {
     }
   });
 
-  blockList.addEventListener('drop', (e) => {
+  blockList.addEventListener("drop", (e) => {
     if (!libraryDragType) return;
     e.preventDefault();
     const insertIdx = libraryDropIndex ?? getDropInsertIndex(e);
@@ -1069,23 +1142,23 @@ function initEditor() {
     updatePreview();
   });
 
-  previewContent?.addEventListener('click', (e) => {
+  previewContent?.addEventListener("click", (e) => {
     if (!e.ctrlKey) return;
-    const anchor = e.target.closest('[data-preview-block-index]');
+    const anchor = e.target.closest("[data-preview-block-index]");
     if (!anchor) return;
     e.preventDefault();
     e.stopPropagation();
-    const idx = Number.parseInt(anchor.dataset.previewBlockIndex || '', 10);
+    const idx = Number.parseInt(anchor.dataset.previewBlockIndex || "", 10);
     if (Number.isNaN(idx)) return;
     clearLinkedSelection();
-    anchor.classList.add('linked-selected');
+    anchor.classList.add("linked-selected");
     focusEditorBlock(idx);
   });
 
   // ---- Update preview ----
   function updatePreview() {
     if (!previewContent) return;
-    let html = '';
+    let html = "";
     const previewCover = postData.coverImage || coverImageSource;
 
     if (previewCover) {
@@ -1099,15 +1172,18 @@ function initEditor() {
     }
 
     const previewBlocks = contentBlocks
-      .map((block, idx) => `<div class="preview-block-anchor" data-preview-block-index="${idx}">${renderBlogContent([block])}</div>`)
-      .join('');
+      .map(
+        (block, idx) =>
+          `<div class="preview-block-anchor" data-preview-block-index="${idx}">${renderBlogContent([block])}</div>`,
+      )
+      .join("");
     html += `<div class="blog-content">${previewBlocks}</div>`;
 
     if (postData.affiliateUrl) {
       html += `
         <div class="cta-block" style="margin-top: var(--space-xl);">
           <a href="${postData.affiliateUrl}" class="btn btn-affiliate" target="_blank" rel="noopener noreferrer">
-            ${esc(postData.affiliateButtonText) || 'Check Price'}
+            ${esc(postData.affiliateButtonText) || "Check Price"}
           </a>
         </div>
       `;
@@ -1118,80 +1194,84 @@ function initEditor() {
   }
 
   // ---- Export JSON ----
-  document.getElementById('btn-publish')?.addEventListener('click', async () => {
-    const payload = buildJSON();
-    if (!payload.title) {
-      showToast('❌ Title is required before publishing.');
-      return;
-    }
-    if (!adminApiKey) {
-      showToast('❌ Add your publishing API key first.');
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-key': adminApiKey,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        let message = 'Publish failed. Verify API key and try again.';
-        try {
-          const data = await res.json();
-          if (data?.error) message = data.error;
-        } catch {
-          // Use fallback
-        }
-        if (res.status === 401) {
-          forceReauth('Invalid API key for publish action.');
-          return;
-        }
-        throw new Error(message);
+  document
+    .getElementById("btn-publish")
+    ?.addEventListener("click", async () => {
+      const payload = buildJSON();
+      if (!payload.title) {
+        showToast("❌ Title is required before publishing.");
+        return;
+      }
+      if (!adminApiKey) {
+        showToast("❌ Add your publishing API key first.");
+        return;
       }
 
-      clearCache();
-      await refreshPostsManager(postsSearch?.value || '');
-      showToast('✅ Published to database successfully!');
-    } catch (error) {
-      showToast(`❌ ${error.message}`);
-    }
-  });
+      try {
+        const res = await fetch("/api/posts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminApiKey,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          let message = "Publish failed. Verify API key and try again.";
+          try {
+            const data = await res.json();
+            if (data?.error) message = data.error;
+          } catch {
+            // Use fallback
+          }
+          if (res.status === 401) {
+            forceReauth("Invalid API key for publish action.");
+            return;
+          }
+          throw new Error(message);
+        }
+
+        clearCache();
+        await refreshPostsManager(postsSearch?.value || "");
+        showToast("✅ Published to database successfully!");
+      } catch (error) {
+        showToast(`❌ ${error.message}`);
+      }
+    });
 
   // ---- Export JSON ----
-  document.getElementById('btn-export')?.addEventListener('click', () => {
+  document.getElementById("btn-export")?.addEventListener("click", () => {
     const json = buildJSON();
-    const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(json, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `${postData.slug || 'post'}.json`;
+    a.download = `${postData.slug || "post"}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('✅ JSON file downloaded!');
+    showToast("✅ JSON file downloaded!");
   });
 
   // ---- Copy JSON ----
-  document.getElementById('btn-copy')?.addEventListener('click', async () => {
+  document.getElementById("btn-copy")?.addEventListener("click", async () => {
     const json = buildJSON();
     try {
       await navigator.clipboard.writeText(JSON.stringify(json, null, 2));
-      showToast('📋 Copied to clipboard!');
+      showToast("📋 Copied to clipboard!");
     } catch {
-      showToast('❌ Failed to copy. Try the export button.');
+      showToast("❌ Failed to copy. Try the export button.");
     }
   });
 
   // ---- Load JSON ----
-  document.getElementById('btn-load')?.addEventListener('click', () => {
-    document.getElementById('file-input')?.click();
+  document.getElementById("btn-load")?.addEventListener("click", () => {
+    document.getElementById("file-input")?.click();
   });
 
-  document.getElementById('file-input')?.addEventListener('change', (e) => {
+  document.getElementById("file-input")?.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -1199,20 +1279,20 @@ function initEditor() {
       try {
         const data = JSON.parse(ev.target.result);
         loadPostData(data);
-        showToast('✅ Post loaded successfully!');
+        showToast("✅ Post loaded successfully!");
       } catch {
-        showToast('❌ Invalid JSON file.');
+        showToast("❌ Invalid JSON file.");
       }
     };
     reader.readAsText(file);
   });
 
   // ---- Clear ----
-  document.getElementById('btn-clear')?.addEventListener('click', () => {
-    if (confirm('Are you sure you want to clear everything?')) {
+  document.getElementById("btn-clear")?.addEventListener("click", () => {
+    if (confirm("Are you sure you want to clear everything?")) {
       postData = createEmptyPost();
       contentBlocks = [];
-      coverImageSource = '';
+      coverImageSource = "";
       coverCropState = { zoom: 1, offsetX: 0, offsetY: 0 };
       localStorage.removeItem(ADMIN_DRAFT_STORAGE);
       renderAdminInPlace();
@@ -1220,13 +1300,13 @@ function initEditor() {
   });
 
   // ---- Mobile preview toggle ----
-  const previewToggle = document.getElementById('preview-toggle');
-  const previewPane = document.getElementById('admin-preview');
+  const previewToggle = document.getElementById("preview-toggle");
+  const previewPane = document.getElementById("admin-preview");
   if (previewToggle && previewPane) {
-    previewToggle.addEventListener('click', () => {
-      const isVisible = previewPane.classList.contains('visible');
-      previewPane.classList.toggle('visible');
-      previewToggle.textContent = isVisible ? '👁️ Preview' : '✏️ Editor';
+    previewToggle.addEventListener("click", () => {
+      const isVisible = previewPane.classList.contains("visible");
+      previewPane.classList.toggle("visible");
+      previewToggle.textContent = isVisible ? "👁️ Preview" : "✏️ Editor";
     });
   }
 
@@ -1239,37 +1319,41 @@ function initEditor() {
 function loadPostData(data) {
   postData = {
     ...createEmptyPost(),
-    slug: data.slug || '',
-    title: data.title || '',
-    subtitle: data.subtitle || '',
-    author: data.author || 'Andy',
-    category: data.category || '',
-    tags: Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || ''),
-    date: data.date || new Date().toISOString().split('T')[0],
-    featured: data.featured || '',
-    coverImage: data.coverImage || '',
-    excerpt: data.excerpt || '',
-    affiliateUrl: data.affiliateUrl || '',
-    affiliateButtonText: data.affiliateButtonText || 'Check Price & Availability',
-    seoTitle: data.seoTitle || '',
-    seoDescription: data.seoDescription || '',
+    slug: data.slug || "",
+    title: data.title || "",
+    subtitle: data.subtitle || "",
+    author: data.author || "Andy",
+    category: data.category || "",
+    tags: Array.isArray(data.tags) ? data.tags.join(", ") : data.tags || "",
+    date: data.date || new Date().toISOString().split("T")[0],
+    featured: data.featured || "",
+    coverImage: data.coverImage || "",
+    excerpt: data.excerpt || "",
+    affiliateUrl: data.affiliateUrl || "",
+    affiliateButtonText:
+      data.affiliateButtonText || "Check Price & Availability",
+    seoTitle: data.seoTitle || "",
+    seoDescription: data.seoDescription || "",
   };
   contentBlocks = Array.isArray(data.content) ? data.content : [];
-  coverImageSource = postData.coverImage || '';
+  coverImageSource = postData.coverImage || "";
   coverCropState = { zoom: 1, offsetX: 0, offsetY: 0 };
   persistDraft();
   renderAdminInPlace();
 }
 
 function buildJSON() {
-  const slug = slugify(postData.title) || 'untitled';
+  const slug = slugify(postData.title) || "untitled";
   return {
     slug,
     title: postData.title,
     subtitle: postData.subtitle,
     author: postData.author,
     category: postData.category,
-    tags: postData.tags.split(',').map(t => t.trim()).filter(Boolean),
+    tags: postData.tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean),
     date: postData.date,
     featured: postData.featured ? parseInt(postData.featured, 10) : null,
     coverImage: postData.coverImage,
@@ -1279,33 +1363,58 @@ function buildJSON() {
     seoTitle: postData.seoTitle,
     seoDescription: postData.seoDescription,
     content: contentBlocks,
-    contentPreview: contentBlocks.filter(b => b.type === 'paragraph').slice(0, 3),
+    contentPreview: contentBlocks
+      .filter((b) => b.type === "paragraph")
+      .slice(0, 3),
   };
 }
 
 function createBlock(type) {
   const base = { id: uid(), type };
   switch (type) {
-    case 'heading':
-      return { ...base, text: '', level: 2, color: '', fontSize: '' };
-    case 'paragraph':
-      return { ...base, text: '', color: '', fontSize: '', textAlign: '' };
-    case 'image':
-      return { ...base, src: '', alt: '', caption: '', width: '', align: 'center' };
-    case 'button':
-      return { ...base, text: 'Learn More', url: '', bgColor: '', textColor: '', size: '', align: 'center' };
-    case 'list':
-      return { ...base, items: [''], ordered: false };
-    case 'blockquote':
-      return { ...base, text: '', cite: '' };
-    case 'divider':
-      return { ...base, style: '' };
-    case 'proscons':
-      return { ...base, pros: [''], cons: [''] };
-    case 'rating':
-      return { ...base, value: 4, max: 5, label: '' };
-    case 'cta':
-      return { ...base, heading: '', text: '', url: '', buttonText: 'Check Price', bgColor: '', textColor: '' };
+    case "heading":
+      return { ...base, text: "", level: 2, color: "", fontSize: "" };
+    case "paragraph":
+      return { ...base, text: "", color: "", fontSize: "", textAlign: "" };
+    case "image":
+      return {
+        ...base,
+        src: "",
+        alt: "",
+        caption: "",
+        width: "",
+        align: "center",
+      };
+    case "button":
+      return {
+        ...base,
+        text: "Learn More",
+        url: "",
+        bgColor: "",
+        textColor: "",
+        size: "",
+        align: "center",
+      };
+    case "list":
+      return { ...base, items: [""], ordered: false };
+    case "blockquote":
+      return { ...base, text: "", cite: "" };
+    case "divider":
+      return { ...base, style: "" };
+    case "proscons":
+      return { ...base, pros: [""], cons: [""] };
+    case "rating":
+      return { ...base, value: 4, max: 5, label: "" };
+    case "cta":
+      return {
+        ...base,
+        heading: "",
+        text: "",
+        url: "",
+        buttonText: "Check Price",
+        bgColor: "",
+        textColor: "",
+      };
     default:
       return base;
   }
@@ -1313,22 +1422,22 @@ function createBlock(type) {
 
 function renderBlockEditor(block, index) {
   const typeLabels = {
-    heading: '📝 Heading',
-    paragraph: '📄 Paragraph',
-    image: '🖼️ Image',
-    button: '🔘 Button',
-    list: '📋 List',
-    blockquote: '💬 Blockquote',
-    divider: '➖ Divider',
-    proscons: '👍👎 Pros/Cons',
-    rating: '⭐ Star Rating',
-    cta: '🎯 CTA Block',
+    heading: "📝 Heading",
+    paragraph: "📄 Paragraph",
+    image: "🖼️ Image",
+    button: "🔘 Button",
+    list: "📋 List",
+    blockquote: "💬 Blockquote",
+    divider: "➖ Divider",
+    proscons: "👍👎 Pros/Cons",
+    rating: "⭐ Star Rating",
+    cta: "🎯 CTA Block",
   };
 
-  let fields = '';
+  let fields = "";
 
   switch (block.type) {
-    case 'heading':
+    case "heading":
       fields = `
         <div class="form-row">
           <div class="form-group">
@@ -1338,9 +1447,9 @@ function renderBlockEditor(block, index) {
           <div class="form-group">
             <label class="form-label">Level</label>
             <select class="form-select form-input-sm" data-block-index="${index}" data-block-field="level">
-              <option value="2" ${block.level == 2 ? 'selected' : ''}>H2</option>
-              <option value="3" ${block.level == 3 ? 'selected' : ''}>H3</option>
-              <option value="4" ${block.level == 4 ? 'selected' : ''}>H4</option>
+              <option value="2" ${block.level == 2 ? "selected" : ""}>H2</option>
+              <option value="3" ${block.level == 3 ? "selected" : ""}>H3</option>
+              <option value="4" ${block.level == 4 ? "selected" : ""}>H4</option>
             </select>
           </div>
         </div>
@@ -1348,7 +1457,7 @@ function renderBlockEditor(block, index) {
           <div class="form-group">
             <div class="color-picker-wrapper">
               <label class="form-label">Color</label>
-              <input type="color" data-block-index="${index}" data-block-field="color" value="${block.color || '#2C2C2C'}" />
+              <input type="color" data-block-index="${index}" data-block-field="color" value="${block.color || "#2C2C2C"}" />
               <input type="text" class="form-input form-input-sm" data-block-index="${index}" data-block-field="color" value="${esc(block.color)}" placeholder="#2C2C2C" style="max-width: 100px;" />
             </div>
           </div>
@@ -1360,7 +1469,7 @@ function renderBlockEditor(block, index) {
       `;
       break;
 
-    case 'paragraph':
+    case "paragraph":
       fields = `
         <div class="form-group">
           <label class="form-label">Text</label>
@@ -1370,7 +1479,7 @@ function renderBlockEditor(block, index) {
           <div class="form-group">
             <div class="color-picker-wrapper">
               <label class="form-label">Color</label>
-              <input type="color" data-block-index="${index}" data-block-field="color" value="${block.color || '#2C2C2C'}" />
+              <input type="color" data-block-index="${index}" data-block-field="color" value="${block.color || "#2C2C2C"}" />
             </div>
           </div>
           <div class="form-group">
@@ -1380,17 +1489,17 @@ function renderBlockEditor(block, index) {
           <div class="form-group">
             <label class="form-label">Text Align</label>
             <select class="form-select form-input-sm" data-block-index="${index}" data-block-field="textAlign">
-              <option value="" ${!block.textAlign ? 'selected' : ''}>Default</option>
-              <option value="left" ${block.textAlign === 'left' ? 'selected' : ''}>Left</option>
-              <option value="center" ${block.textAlign === 'center' ? 'selected' : ''}>Center</option>
-              <option value="right" ${block.textAlign === 'right' ? 'selected' : ''}>Right</option>
+              <option value="" ${!block.textAlign ? "selected" : ""}>Default</option>
+              <option value="left" ${block.textAlign === "left" ? "selected" : ""}>Left</option>
+              <option value="center" ${block.textAlign === "center" ? "selected" : ""}>Center</option>
+              <option value="right" ${block.textAlign === "right" ? "selected" : ""}>Right</option>
             </select>
           </div>
         </div>
       `;
       break;
 
-    case 'image':
+    case "image":
       fields = `
         <div class="form-group">
           <label class="form-label">Image URL</label>
@@ -1414,16 +1523,16 @@ function renderBlockEditor(block, index) {
           <div class="form-group">
             <label class="form-label">Alignment</label>
             <select class="form-select form-input-sm" data-block-index="${index}" data-block-field="align">
-              <option value="center" ${block.align === 'center' ? 'selected' : ''}>Center</option>
-              <option value="left" ${block.align === 'left' ? 'selected' : ''}>Left</option>
-              <option value="right" ${block.align === 'right' ? 'selected' : ''}>Right</option>
+              <option value="center" ${block.align === "center" ? "selected" : ""}>Center</option>
+              <option value="left" ${block.align === "left" ? "selected" : ""}>Left</option>
+              <option value="right" ${block.align === "right" ? "selected" : ""}>Right</option>
             </select>
           </div>
         </div>
       `;
       break;
 
-    case 'button':
+    case "button":
       fields = `
         <div class="form-row">
           <div class="form-group">
@@ -1439,41 +1548,45 @@ function renderBlockEditor(block, index) {
           <div class="form-group">
             <div class="color-picker-wrapper">
               <label class="form-label">BG Color</label>
-              <input type="color" data-block-index="${index}" data-block-field="bgColor" value="${block.bgColor || '#D4923A'}" />
+              <input type="color" data-block-index="${index}" data-block-field="bgColor" value="${block.bgColor || "#D4923A"}" />
             </div>
           </div>
           <div class="form-group">
             <div class="color-picker-wrapper">
               <label class="form-label">Text Color</label>
-              <input type="color" data-block-index="${index}" data-block-field="textColor" value="${block.textColor || '#FFFFFF'}" />
+              <input type="color" data-block-index="${index}" data-block-field="textColor" value="${block.textColor || "#FFFFFF"}" />
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">Size</label>
             <select class="form-select form-input-sm" data-block-index="${index}" data-block-field="size">
-              <option value="" ${!block.size ? 'selected' : ''}>Default</option>
-              <option value="small" ${block.size === 'small' ? 'selected' : ''}>Small</option>
-              <option value="large" ${block.size === 'large' ? 'selected' : ''}>Large</option>
+              <option value="" ${!block.size ? "selected" : ""}>Default</option>
+              <option value="small" ${block.size === "small" ? "selected" : ""}>Small</option>
+              <option value="large" ${block.size === "large" ? "selected" : ""}>Large</option>
             </select>
           </div>
         </div>
       `;
       break;
 
-    case 'list':
-      const listItems = (block.items || []).map((item, ii) => `
+    case "list":
+      const listItems = (block.items || [])
+        .map(
+          (item, ii) => `
         <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm); align-items: center;">
           <input type="text" class="form-input form-input-sm" data-list-item data-block-index="${index}" data-item-index="${ii}" value="${esc(item)}" placeholder="List item" style="flex: 1;" />
           <button class="block-action-btn delete list-remove-item" data-block-index="${index}" data-item-index="${ii}" title="Remove">✕</button>
         </div>
-      `).join('');
+      `,
+        )
+        .join("");
 
       fields = `
         <div class="form-group">
           <label class="form-label">Type</label>
           <select class="form-select form-input-sm" data-block-index="${index}" data-block-field="ordered">
-            <option value="false" ${!block.ordered ? 'selected' : ''}>Bulleted</option>
-            <option value="true" ${block.ordered ? 'selected' : ''}>Numbered</option>
+            <option value="false" ${!block.ordered ? "selected" : ""}>Bulleted</option>
+            <option value="true" ${block.ordered ? "selected" : ""}>Numbered</option>
           </select>
         </div>
         <div class="form-group">
@@ -1484,7 +1597,7 @@ function renderBlockEditor(block, index) {
       `;
       break;
 
-    case 'blockquote':
+    case "blockquote":
       fields = `
         <div class="form-group">
           <label class="form-label">Quote Text</label>
@@ -1497,33 +1610,41 @@ function renderBlockEditor(block, index) {
       `;
       break;
 
-    case 'divider':
+    case "divider":
       fields = `
         <div class="form-group">
           <label class="form-label">Style</label>
           <select class="form-select form-input-sm" data-block-index="${index}" data-block-field="style">
-            <option value="" ${!block.style ? 'selected' : ''}>Simple line</option>
-            <option value="dotted" ${block.style === 'dotted' ? 'selected' : ''}>Dotted</option>
-            <option value="thick" ${block.style === 'thick' ? 'selected' : ''}>Thick gradient</option>
+            <option value="" ${!block.style ? "selected" : ""}>Simple line</option>
+            <option value="dotted" ${block.style === "dotted" ? "selected" : ""}>Dotted</option>
+            <option value="thick" ${block.style === "thick" ? "selected" : ""}>Thick gradient</option>
           </select>
         </div>
       `;
       break;
 
-    case 'proscons':
-      const prosItems = (block.pros || []).map((p, ii) => `
+    case "proscons":
+      const prosItems = (block.pros || [])
+        .map(
+          (p, ii) => `
         <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm); align-items: center;">
           <input type="text" class="form-input form-input-sm" data-proscons-item data-block-index="${index}" data-list="pros" data-item-index="${ii}" value="${esc(p)}" placeholder="Pro..." style="flex: 1;" />
           <button class="block-action-btn delete proscons-remove" data-block-index="${index}" data-list="pros" data-item-index="${ii}" title="Remove">✕</button>
         </div>
-      `).join('');
+      `,
+        )
+        .join("");
 
-      const consItems = (block.cons || []).map((c, ii) => `
+      const consItems = (block.cons || [])
+        .map(
+          (c, ii) => `
         <div style="display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm); align-items: center;">
           <input type="text" class="form-input form-input-sm" data-proscons-item data-block-index="${index}" data-list="cons" data-item-index="${ii}" value="${esc(c)}" placeholder="Con..." style="flex: 1;" />
           <button class="block-action-btn delete proscons-remove" data-block-index="${index}" data-list="cons" data-item-index="${ii}" title="Remove">✕</button>
         </div>
-      `).join('');
+      `,
+        )
+        .join("");
 
       fields = `
         <div class="form-row">
@@ -1541,7 +1662,7 @@ function renderBlockEditor(block, index) {
       `;
       break;
 
-    case 'rating':
+    case "rating":
       fields = `
         <div class="form-row">
           <div class="form-group">
@@ -1560,7 +1681,7 @@ function renderBlockEditor(block, index) {
       `;
       break;
 
-    case 'cta':
+    case "cta":
       fields = `
         <div class="form-group">
           <label class="form-label">Heading</label>
@@ -1584,13 +1705,13 @@ function renderBlockEditor(block, index) {
           <div class="form-group">
             <div class="color-picker-wrapper">
               <label class="form-label">BG Color</label>
-              <input type="color" data-block-index="${index}" data-block-field="bgColor" value="${block.bgColor || '#D4923A'}" />
+              <input type="color" data-block-index="${index}" data-block-field="bgColor" value="${block.bgColor || "#D4923A"}" />
             </div>
           </div>
           <div class="form-group">
             <div class="color-picker-wrapper">
               <label class="form-label">Text Color</label>
-              <input type="color" data-block-index="${index}" data-block-field="textColor" value="${block.textColor || '#FFFFFF'}" />
+              <input type="color" data-block-index="${index}" data-block-field="textColor" value="${block.textColor || "#FFFFFF"}" />
             </div>
           </div>
         </div>
@@ -1624,19 +1745,22 @@ function renderBlockEditor(block, index) {
 
 function renderInsertButtons(index) {
   const types = [
-    ['heading', 'Heading'],
-    ['paragraph', 'Paragraph'],
-    ['image', 'Image'],
-    ['button', 'Button'],
-    ['list', 'List'],
-    ['blockquote', 'Quote'],
-    ['divider', 'Divider'],
-    ['proscons', 'Pros/Cons'],
-    ['rating', 'Rating'],
-    ['cta', 'CTA'],
+    ["heading", "Heading"],
+    ["paragraph", "Paragraph"],
+    ["image", "Image"],
+    ["button", "Button"],
+    ["list", "List"],
+    ["blockquote", "Quote"],
+    ["divider", "Divider"],
+    ["proscons", "Pros/Cons"],
+    ["rating", "Rating"],
+    ["cta", "CTA"],
   ];
 
   return types
-    .map(([type, label]) => `<button class="block-insert-btn" data-insert-index="${index}" data-type="${type}">+ ${label}</button>`)
-    .join('');
+    .map(
+      ([type, label]) =>
+        `<button class="block-insert-btn" data-insert-index="${index}" data-type="${type}">+ ${label}</button>`,
+    )
+    .join("");
 }

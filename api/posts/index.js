@@ -1,26 +1,32 @@
-import { ensureSchema, sql } from '../_lib/db.js';
-import { normalizeIncomingPost, parseListParams, postSummaryFromRow } from '../_lib/posts.js';
+import { ensureSchema, sql } from "../_lib/db.js";
+import {
+  normalizeIncomingPost,
+  parseListParams,
+  postSummaryFromRow,
+} from "../_lib/posts.js";
 
 function unauthorized(res) {
-  res.status(401).json({ error: 'Invalid API key.' });
+  res.status(401).json({ error: "Invalid API key." });
 }
 
 function getAdminApiKey() {
-  return String(process.env.ADMIN_API_KEY || process.env.HANDY_ADMIN_API_KEY || '').trim();
+  return String(
+    process.env.ADMIN_API_KEY || process.env.HANDY_ADMIN_API_KEY || "",
+  ).trim();
 }
 
 function methodNotAllowed(res) {
-  res.setHeader('Allow', 'GET, POST');
-  res.status(405).json({ error: 'Method not allowed' });
+  res.setHeader("Allow", "GET, POST");
+  res.status(405).json({ error: "Method not allowed" });
 }
 
 export default async function handler(req, res) {
   try {
     await ensureSchema();
 
-    if (req.method === 'GET') {
+    if (req.method === "GET") {
       const { category, search, sort, limit } = parseListParams(req.query);
-      const categoryArg = category && category !== 'All' ? category : null;
+      const categoryArg = category && category !== "All" ? category : null;
       const searchArg = search || null;
 
       const rows = await sql`
@@ -41,26 +47,32 @@ export default async function handler(req, res) {
       `;
 
       let normalized = rows.map(postSummaryFromRow);
-      if (sort === 'oldest') {
-        normalized = normalized.sort((a, b) => new Date(a.date) - new Date(b.date));
-      } else if (sort === 'az') {
+      if (sort === "oldest") {
+        normalized = normalized.sort(
+          (a, b) => new Date(a.date) - new Date(b.date),
+        );
+      } else if (sort === "az") {
         normalized = normalized.sort((a, b) => a.title.localeCompare(b.title));
-      } else if (sort === 'za') {
+      } else if (sort === "za") {
         normalized = normalized.sort((a, b) => b.title.localeCompare(a.title));
       }
 
       return res.status(200).json(normalized.slice(0, limit));
     }
 
-    if (req.method === 'POST') {
+    if (req.method === "POST") {
       const expectedKey = getAdminApiKey();
-      const providedHeader = req.headers['x-admin-key'];
+      const providedHeader = req.headers["x-admin-key"];
       const providedKey = Array.isArray(providedHeader)
-        ? String(providedHeader[0] || '').trim()
-        : String(providedHeader || '').trim();
+        ? String(providedHeader[0] || "").trim()
+        : String(providedHeader || "").trim();
 
       if (!expectedKey) {
-        return res.status(500).json({ error: 'Server missing ADMIN_API_KEY environment variable.' });
+        return res
+          .status(500)
+          .json({
+            error: "Server missing ADMIN_API_KEY environment variable.",
+          });
       }
 
       if (providedKey !== expectedKey) {
@@ -68,7 +80,8 @@ export default async function handler(req, res) {
       }
 
       try {
-        const payload = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+        const payload =
+          typeof req.body === "string" ? JSON.parse(req.body) : req.body;
         const post = normalizeIncomingPost(payload);
 
         await sql`
@@ -79,7 +92,7 @@ export default async function handler(req, res) {
           )
           VALUES (
             ${post.slug}, ${post.title}, ${post.subtitle || null}, ${post.author}, ${post.category}, ${post.tags},
-            ${post.publishedOn}, ${post.coverImage || null}, ${post.excerpt || ''}, ${post.affiliateUrl || null},
+            ${post.publishedOn}, ${post.coverImage || null}, ${post.excerpt || ""}, ${post.affiliateUrl || null},
             ${post.affiliateButtonText || null}, ${post.seoTitle || null}, ${post.seoDescription || null},
             ${JSON.stringify(post.content)}, ${post.featuredRank}, now()
           )
@@ -104,12 +117,16 @@ export default async function handler(req, res) {
 
         return res.status(200).json({ ok: true, slug: post.slug });
       } catch (error) {
-        return res.status(400).json({ error: error.message || 'Invalid request body' });
+        return res
+          .status(400)
+          .json({ error: error.message || "Invalid request body" });
       }
     }
 
     return methodNotAllowed(res);
   } catch (error) {
-    return res.status(500).json({ error: error?.message || 'Database request failed.' });
+    return res
+      .status(500)
+      .json({ error: error?.message || "Database request failed." });
   }
 }

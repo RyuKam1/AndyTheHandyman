@@ -2,11 +2,11 @@
  * Post Page — Individual blog/product page
  */
 
-import { getPost, getRelatedPosts } from '../store.js';
-import { renderBlogContent } from '../components/blogRenderer.js';
-import { renderProductCard } from '../components/productCard.js';
-import { updateMeta } from '../utils/seo.js';
-import { formatDate, readingTime } from '../utils/helpers.js';
+import { getPost, getRelatedPosts } from "../store.js";
+import { renderBlogContent } from "../components/blogRenderer.js";
+import { renderProductCard } from "../components/productCard.js";
+import { updateMeta } from "../utils/seo.js";
+import { formatDate, readingTime } from "../utils/helpers.js";
 
 /**
  * Render a blog post page.
@@ -31,7 +31,7 @@ export async function renderPostPage(params) {
   // Update SEO
   updateMeta({
     title: post.title,
-    description: post.excerpt || post.seoDescription || '',
+    description: post.excerpt || post.seoDescription || "",
     image: post.coverImage,
   });
 
@@ -45,14 +45,14 @@ export async function renderPostPage(params) {
       <div class="post-page">
         <a href="#/" class="post-back">← Back to all products</a>
 
-        ${post.coverImage ? `<img class="post-hero-image" src="${post.coverImage}" alt="${post.title}" />` : ''}
+        ${post.coverImage ? `<img class="post-hero-image" src="${post.coverImage}" alt="${post.title}" />` : ""}
 
         <header class="post-header">
-          ${post.category ? `<span class="badge post-category">${post.category}</span>` : ''}
+          ${post.category ? `<span class="badge post-category">${post.category}</span>` : ""}
           <h1 class="post-title">${post.title}</h1>
-          ${post.subtitle ? `<p style="font-size: var(--fs-md); color: var(--color-text-secondary); margin-bottom: var(--space-md);">${post.subtitle}</p>` : ''}
+          ${post.subtitle ? `<p style="font-size: var(--fs-md); color: var(--color-text-secondary); margin-bottom: var(--space-md);">${post.subtitle}</p>` : ""}
           <div class="post-meta-bar">
-            ${post.author ? `<span>By <strong>${post.author}</strong></span>` : ''}
+            ${post.author ? `<span>By <strong>${post.author}</strong></span>` : ""}
             <span>📅 ${date}</span>
             <span>📖 ${time}</span>
           </div>
@@ -62,29 +62,37 @@ export async function renderPostPage(params) {
           ${blogHTML}
         </article>
 
-        ${post.affiliateUrl ? `
+        ${
+          post.affiliateUrl
+            ? `
           <div class="cta-block" style="margin-top: var(--space-2xl);">
             <h3 style="margin-bottom: var(--space-md);">Interested in this product?</h3>
             <a href="${post.affiliateUrl}" class="btn btn-affiliate btn-lg" target="_blank" rel="noopener noreferrer">
-              ${post.affiliateButtonText || '🛒 Check Price & Availability'}
+              ${post.affiliateButtonText || "🛒 Check Price & Availability"}
             </a>
           </div>
-        ` : ''}
+        `
+            : ""
+        }
 
         <div id="related-section"></div>
       </div>
     </div>
 
-    ${post.affiliateUrl ? `
+    ${
+      post.affiliateUrl
+        ? `
       <div class="sticky-cta" id="sticky-cta">
         <div class="sticky-cta-inner">
           <span class="sticky-cta-text">${post.title}</span>
           <a href="${post.affiliateUrl}" class="btn btn-accent btn-sm" target="_blank" rel="noopener noreferrer">
-            ${post.affiliateButtonText || 'Check Price'}
+            ${post.affiliateButtonText || "Check Price"}
           </a>
         </div>
       </div>
-    ` : ''}
+    `
+        : ""
+    }
   `;
 
   // Deferred init
@@ -98,33 +106,36 @@ export async function renderPostPage(params) {
  */
 async function initPostPage(post) {
   // ---- Sticky CTA visibility ----
-  const stickyCta = document.getElementById('sticky-cta');
+  const stickyCta = document.getElementById("sticky-cta");
   if (stickyCta) {
-    const observer = new IntersectionObserver((entries) => {
-      // Show sticky CTA when user scrolls past the hero image
-      stickyCta.classList.toggle('visible', !entries[0].isIntersecting);
-    }, { threshold: 0 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Show sticky CTA when user scrolls past the hero image
+        stickyCta.classList.toggle("visible", !entries[0].isIntersecting);
+      },
+      { threshold: 0 },
+    );
 
-    const heroImg = document.querySelector('.post-hero-image');
+    const heroImg = document.querySelector(".post-hero-image");
     if (heroImg) {
       observer.observe(heroImg);
     } else {
       // No hero image, show after slight scroll
-      setTimeout(() => stickyCta.classList.add('visible'), 1000);
+      setTimeout(() => stickyCta.classList.add("visible"), 1000);
     }
   }
 
   // ---- Related posts ----
   if (post.category) {
     const relatedPosts = await getRelatedPosts(post.slug, post.category, 3);
-    const relatedSection = document.getElementById('related-section');
+    const relatedSection = document.getElementById("related-section");
 
     if (relatedSection && relatedPosts.length > 0) {
       relatedSection.innerHTML = `
         <section class="related-section">
           <h3>You Might Also Like</h3>
           <div class="related-grid">
-            ${relatedPosts.map(p => renderProductCard(p)).join('')}
+            ${relatedPosts.map((p) => renderProductCard(p)).join("")}
           </div>
         </section>
       `;

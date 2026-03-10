@@ -9,6 +9,7 @@ import { renderFooter } from './components/footer.js';
 import { renderHomePage } from './pages/home.js';
 import { renderPostPage } from './pages/post.js';
 import { renderAdminPage } from './pages/admin.js';
+import { initTheme } from './utils/theme.js';
 
 /**
  * Initialize the application.
@@ -16,6 +17,7 @@ import { renderAdminPage } from './pages/admin.js';
 function init() {
   const app = document.getElementById('app');
   if (!app) return;
+  initTheme();
 
   // Render shell (header + content container + footer)
   app.innerHTML = `

@@ -21,10 +21,12 @@ body {
   line-height: var(--lh-normal);
   color: var(--color-text);
   background-color: var(--color-bg);
+  background-image: var(--page-bg-gradient);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background-color var(--transition-slow), color var(--transition-slow);
 }
 
 /* ---- Headings ---- */
@@ -56,6 +58,26 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+body,
+.site-header,
+.card,
+.bento-card,
+.featured-card,
+.mobile-nav,
+.sort-select,
+.search-input,
+.category-chip,
+.btn,
+.admin-editor,
+.admin-preview,
+.admin-tools {
+  transition:
+    background-color var(--transition-slow),
+    border-color var(--transition-slow),
+    color var(--transition-slow),
+    box-shadow var(--transition-slow);
 }
 
 /* ---- Lists ---- */

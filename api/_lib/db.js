@@ -1,4 +1,4 @@
-import { neon } from '@neondatabase/serverless';
+import { neon } from "@neondatabase/serverless";
 
 const DATABASE_URL =
   process.env.DATABASE_URL ||
@@ -12,7 +12,9 @@ let schemaReadyPromise = null;
 
 export async function ensureSchema() {
   if (!sql) {
-    throw new Error('DATABASE_URL/POSTGRES_URL is not configured on the server.');
+    throw new Error(
+      "DATABASE_URL/POSTGRES_URL is not configured on the server.",
+    );
   }
 
   if (schemaReadyPromise) return schemaReadyPromise;
