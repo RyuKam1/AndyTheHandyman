@@ -4,11 +4,21 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npm run dev:localdb",
+    "dev:web": "vite",
+    "dev:api": "node scripts/dev-api-server.mjs",
+    "dev:localdb": "concurrently -k -n api,web \"npm:dev:api\" \"npm:dev:web\"",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:bootstrap": "node scripts/bootstrap-neon.mjs"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "vite": "^5.4.0"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "dotenv": "^17.3.1",
+    "express": "^5.1.0"
   }
 }

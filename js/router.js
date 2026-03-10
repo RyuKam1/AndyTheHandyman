@@ -46,8 +46,11 @@ export function navigateTo(path) {
  * Get the current path from hash.
  */
 export function getCurrentPath() {
-  const hash = window.location.hash.slice(1) || '/';
-  return hash;
+  const hashPath = window.location.hash.slice(1).trim();
+  if (hashPath) return hashPath;
+
+  const pathname = window.location.pathname || '/';
+  return pathname;
 }
 
 /**
@@ -120,10 +123,7 @@ async function handleRoute() {
  */
 export function initRouter() {
   window.addEventListener('hashchange', handleRoute);
+  window.addEventListener('popstate', handleRoute);
   // Handle initial load
-  if (!window.location.hash) {
-    window.location.hash = '#/';
-  } else {
-    handleRoute();
-  }
+  handleRoute();
 }
