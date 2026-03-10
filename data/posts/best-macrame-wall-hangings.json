@@ -1,0 +1,45 @@
+{
+  "slug": "best-macrame-wall-hangings",
+  "title": "Best Macramé Wall Hangings to Transform Any Room",
+  "excerpt": "Macramé is back in a big way. We curated the most stunning handwoven wall hangings that add instant warmth and texture to your space.",
+  "category": "Macramé & Textiles",
+  "tags": ["macrame", "wall hanging", "boho", "textile", "handmade"],
+  "coverImage": "https://images.unsplash.com/photo-1622209426552-69052c590c2b?w=800&q=80",
+  "date": "2025-03-01",
+  "affiliateLink": "https://example.com/macrame",
+  "content": [
+    {
+      "id": "1",
+      "type": "heading",
+      "props": { "level": "h2", "text": "Why Macramé is the Ultimate Boho Statement", "color": "#2c3e50" }
+    },
+    {
+      "id": "2",
+      "type": "paragraph",
+      "props": { "text": "If you are looking to add warmth, texture, and a bohemian vibe to your living room or bedroom, a large macramé wall hanging is the easiest way to do it. Unlike framed art which can feel rigid, the soft cotton cords bring an organic, relaxed element indoors." }
+    },
+    {
+      "id": "3",
+      "type": "image",
+      "props": { "src": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80", "alt": "Macrame in bedroom", "caption": "A large over-the-bed macramé piece serves as an excellent focal point." }
+    },
+    {
+      "id": "4",
+      "type": "pros-cons",
+      "props": {
+        "pros": ["Adds instant texture and warmth", "Excellent sound dampening", "Lightweight and easy to hang"],
+        "cons": ["Can collect dust", "Not ideal for humid areas like bathrooms"]
+      }
+    },
+    {
+      "id": "5",
+      "type": "rating",
+      "props": { "score": 4.8, "max": 5, "reviewCount": 350, "label": "Boho Bliss XL Macramé" }
+    },
+    {
+      "id": "6",
+      "type": "cta",
+      "props": { "title": "Get the Boho Bliss XL", "text": "Currently 20% off for the spring sale.", "buttonText": "Check Price", "url": "https://example.com/macrame", "style": "primary" }
+    }
+  ]
+}

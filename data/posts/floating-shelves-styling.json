@@ -1,0 +1,17 @@
+{
+  "slug": "floating-shelves-styling",
+  "title": "Floating Shelves: Best Picks & How to Style Them",
+  "excerpt": "Floating shelves are the ultimate blend of storage and décor. We picked the best options and share styling secrets designers swear by.",
+  "category": "Shelves & Ledges",
+  "tags": ["floating shelves", "shelving", "styling", "wall storage", "display"],
+  "coverImage": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+  "date": "2025-01-22",
+  "affiliateLink": "https://example.com/shelves",
+  "content": [
+    {
+      "id": "1",
+      "type": "paragraph",
+      "props": { "text": "A good set of floating shelves can instantly elevate a bare wall. The trick to styling them? Stick to odd numbers, mix heights, and balance textures." }
+    }
+  ]
+}

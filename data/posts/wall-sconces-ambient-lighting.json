@@ -1,0 +1,17 @@
+{
+  "slug": "wall-sconces-ambient-lighting",
+  "title": "Best Wall Sconces for Warm, Ambient Lighting",
+  "excerpt": "The right wall sconce does more than light a room — it sets the entire mood. Here are our top picks for every style and budget.",
+  "category": "Wall Lighting",
+  "tags": ["sconces", "wall light", "ambient", "lighting", "mood"],
+  "coverImage": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
+  "date": "2024-12-28",
+  "affiliateLink": "https://example.com/lighting",
+  "content": [
+    {
+      "id": "1",
+      "type": "paragraph",
+      "props": { "text": "Skip the harsh overhead lights and opt for wall sconces. By washing the walls with soft, warm light, you make any room feel instantly cozier." }
+    }
+  ]
+}

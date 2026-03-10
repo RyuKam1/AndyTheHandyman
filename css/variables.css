@@ -1,0 +1,128 @@
+/* ========================================
+   Design Tokens — Andy The Handyman
+   Warm, cozy, premium palette
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* ---- Color Palette ---- */
+  --color-primary:        #2B4C7E;   /* Deep steel blue */
+  --color-primary-light:  #3D6BAF;
+  --color-primary-dark:   #1A3356;
+
+  --color-accent:         #D4923A;   /* Warm amber/gold */
+  --color-accent-light:   #E8AD5A;
+  --color-accent-dark:    #B87A2A;
+
+  --color-bg:             #FAF7F2;   /* Warm cream */
+  --color-bg-alt:         #F0EBE3;   /* Slightly darker cream */
+  --color-surface:        #FFFFFF;
+  --color-surface-hover:  #F5F2ED;
+
+  --color-text:           #2C2C2C;
+  --color-text-secondary: #6B6B6B;
+  --color-text-muted:     #9B9B9B;
+  --color-text-inverse:   #FFFFFF;
+
+  --color-border:         #E0DCD5;
+  --color-border-light:   #EDE9E3;
+
+  --color-success:        #48A874;
+  --color-warning:        #E8AD5A;
+  --color-danger:         #D94F4F;
+
+  /* ---- Typography ---- */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body:    'Inter', sans-serif;
+
+  --fs-xs:   0.75rem;    /* 12px */
+  --fs-sm:   0.875rem;   /* 14px */
+  --fs-base: 1rem;       /* 16px */
+  --fs-md:   1.125rem;   /* 18px */
+  --fs-lg:   1.25rem;    /* 20px */
+  --fs-xl:   1.5rem;     /* 24px */
+  --fs-2xl:  2rem;       /* 32px */
+  --fs-3xl:  2.5rem;     /* 40px */
+  --fs-4xl:  3rem;       /* 48px */
+
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+  --fw-extrabold:800;
+
+  --lh-tight:  1.2;
+  --lh-normal: 1.6;
+  --lh-loose:  1.8;
+
+  /* ---- Spacing ---- */
+  --space-xs:  0.25rem;  /* 4px */
+  --space-sm:  0.5rem;   /* 8px */
+  --space-md:  1rem;     /* 16px */
+  --space-lg:  1.5rem;   /* 24px */
+  --space-xl:  2rem;     /* 32px */
+  --space-2xl: 3rem;     /* 48px */
+  --space-3xl: 4rem;     /* 64px */
+  --space-4xl: 6rem;     /* 96px */
+
+  /* ---- Border Radius ---- */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-full: 9999px;
+
+  /* ---- Shadows ---- */
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:   0 12px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
+  --shadow-xl:   0 20px 48px rgba(0,0,0,0.14), 0 8px 16px rgba(0,0,0,0.08);
+  --shadow-glow: 0 0 20px rgba(212,146,58,0.25);
+
+  /* ---- Transitions ---- */
+  --transition-fast:   150ms ease;
+  --transition-base:   250ms ease;
+  --transition-slow:   400ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ---- Layout ---- */
+  --container-max:  1200px;
+  --content-max:    720px;
+  --header-height:  64px;
+
+  /* ---- Z-Index Scale ---- */
+  --z-base:     1;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-overlay:  500;
+  --z-modal:    1000;
+}
+
+/* ---- Dark Mode ---- */
+@media (prefers-color-scheme: dark) {
+  :root.auto-theme {
+    --color-bg:             #1A1A2E;
+    --color-bg-alt:         #16213E;
+    --color-surface:        #222244;
+    --color-surface-hover:  #2A2A4A;
+    --color-text:           #E8E8E8;
+    --color-text-secondary: #A0A0B0;
+    --color-text-muted:     #707080;
+    --color-border:         #333355;
+    --color-border-light:   #2A2A4A;
+  }
+}
+
+:root.dark-theme {
+  --color-bg:             #1A1A2E;
+  --color-bg-alt:         #16213E;
+  --color-surface:        #222244;
+  --color-surface-hover:  #2A2A4A;
+  --color-text:           #E8E8E8;
+  --color-text-secondary: #A0A0B0;
+  --color-text-muted:     #707080;
+  --color-border:         #333355;
+  --color-border-light:   #2A2A4A;
+}

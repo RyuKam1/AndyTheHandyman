@@ -1,0 +1,95 @@
+[
+  {
+    "slug": "best-macrame-wall-hangings",
+    "title": "Best Macramé Wall Hangings to Transform Any Room",
+    "excerpt": "Macramé is back in a big way. We curated the most stunning handwoven wall hangings that add instant warmth and texture to your space.",
+    "category": "Macramé & Textiles",
+    "tags": ["macrame", "wall hanging", "boho", "textile", "handmade"],
+    "coverImage": "https://images.unsplash.com/photo-1622209426552-69052c590c2b?w=800&q=80",
+    "date": "2025-03-01",
+    "featured": 1,
+    "contentPreview": [{ "type": "paragraph", "text": "Macramé is back in a big way. We curated the most stunning handwoven wall hangings." }]
+  },
+  {
+    "slug": "gallery-wall-guide",
+    "title": "How to Create the Perfect Gallery Wall — Step by Step",
+    "excerpt": "A well-designed gallery wall turns a blank space into a curated art collection. Here's exactly how to plan, lay out, and hang one like a pro.",
+    "category": "Gallery Walls",
+    "tags": ["gallery wall", "frames", "art arrangement", "layout", "tips"],
+    "coverImage": "https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80",
+    "date": "2025-02-18",
+    "featured": 2,
+    "contentPreview": [{ "type": "paragraph", "text": "A well-designed gallery wall turns a blank space into a curated art collection." }]
+  },
+  {
+    "slug": "decorative-mirrors-roundup",
+    "title": "10 Stunning Decorative Mirrors That Double Your Space",
+    "excerpt": "Mirrors aren't just functional — the right decorative mirror can make a room feel twice as big and infinitely more stylish.",
+    "category": "Mirrors",
+    "tags": ["mirrors", "decorative", "space", "wall decor", "illusion"],
+    "coverImage": "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80",
+    "date": "2025-02-05",
+    "featured": 3,
+    "contentPreview": [{ "type": "paragraph", "text": "Mirrors aren't just functional — the right decorative mirror can make a room feel twice as big." }]
+  },
+  {
+    "slug": "floating-shelves-styling",
+    "title": "Floating Shelves: Best Picks & How to Style Them",
+    "excerpt": "Floating shelves are the ultimate blend of storage and décor. We picked the best options and share styling secrets designers swear by.",
+    "category": "Shelves & Ledges",
+    "tags": ["floating shelves", "shelving", "styling", "wall storage", "display"],
+    "coverImage": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
+    "date": "2025-01-22",
+    "contentPreview": [{ "type": "paragraph", "text": "Floating shelves are the ultimate blend of storage and décor." }]
+  },
+  {
+    "slug": "peel-and-stick-wallpaper-guide",
+    "title": "Peel-and-Stick Wallpaper: The Renter-Friendly Wall Upgrade",
+    "excerpt": "No commitment, no damage, all style. Peel-and-stick wallpaper is the easiest way to completely change a room's personality.",
+    "category": "Wallpaper & Murals",
+    "tags": ["wallpaper", "peel and stick", "renter friendly", "accent wall", "diy"],
+    "coverImage": "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80",
+    "date": "2025-01-10",
+    "contentPreview": [{ "type": "paragraph", "text": "No commitment, no damage, all style." }]
+  },
+  {
+    "slug": "wall-sconces-ambient-lighting",
+    "title": "Best Wall Sconces for Warm, Ambient Lighting",
+    "excerpt": "The right wall sconce does more than light a room — it sets the entire mood. Here are our top picks for every style and budget.",
+    "category": "Wall Lighting",
+    "tags": ["sconces", "wall light", "ambient", "lighting", "mood"],
+    "coverImage": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
+    "date": "2024-12-28",
+    "contentPreview": [{ "type": "paragraph", "text": "The right wall sconce sets the entire mood." }]
+  },
+  {
+    "slug": "metal-wall-art-picks",
+    "title": "Metal Wall Art: Modern Pieces That Make a Statement",
+    "excerpt": "From abstract geometric shapes to nature-inspired designs, metal wall art adds a bold, modern edge to any room.",
+    "category": "Wall Art",
+    "tags": ["metal art", "wall art", "modern", "geometric", "sculpture"],
+    "coverImage": "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=800&q=80",
+    "date": "2024-12-15",
+    "contentPreview": [{ "type": "paragraph", "text": "Metal wall art adds a bold, modern edge to any room." }]
+  },
+  {
+    "slug": "wall-planters-indoor-greenery",
+    "title": "Wall Planters: Bring Nature Indoors With Living Walls",
+    "excerpt": "Wall-mounted planters let you turn any vertical surface into a lush, living display. Here are the best systems for every skill level.",
+    "category": "Wall Planters",
+    "tags": ["planters", "plants", "indoor garden", "living wall", "greenery"],
+    "coverImage": "https://images.unsplash.com/photo-1545241047-6083a3684587?w=800&q=80",
+    "date": "2024-12-01",
+    "contentPreview": [{ "type": "paragraph", "text": "Turn any vertical surface into a lush, living display." }]
+  },
+  {
+    "slug": "tapestry-wall-hanging-guide",
+    "title": "Tapestry Wall Hangings: The Ultimate Boho Statement Piece",
+    "excerpt": "Large-format tapestries cover huge wall spaces for minimal cost and maximum visual impact. Here's how to choose and hang the perfect one.",
+    "category": "Macramé & Textiles",
+    "tags": ["tapestry", "boho", "wall hanging", "textile", "large format"],
+    "coverImage": "https://images.unsplash.com/photo-1615873968403-89e068629265?w=800&q=80",
+    "date": "2024-11-18",
+    "contentPreview": [{ "type": "paragraph", "text": "Tapestries cover huge wall spaces for minimal cost and maximum impact." }]
+  }
+]

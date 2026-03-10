@@ -1,0 +1,17 @@
+{
+  "slug": "peel-and-stick-wallpaper-guide",
+  "title": "Peel-and-Stick Wallpaper: The Renter-Friendly Wall Upgrade",
+  "excerpt": "No commitment, no damage, all style. Peel-and-stick wallpaper is the easiest way to completely change a room's personality.",
+  "category": "Wallpaper & Murals",
+  "tags": ["wallpaper", "peel and stick", "renter friendly", "accent wall", "diy"],
+  "coverImage": "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=800&q=80",
+  "date": "2025-01-10",
+  "affiliateLink": "https://example.com/wallpaper",
+  "content": [
+    {
+      "id": "1",
+      "type": "paragraph",
+      "props": { "text": "Peel-and-stick wallpaper has come a long way. The modern vinyls look like high-end designer paper, but they come off cleanly when it's time to move." }
+    }
+  ]
+}

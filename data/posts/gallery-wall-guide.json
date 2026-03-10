@@ -1,0 +1,40 @@
+{
+  "slug": "gallery-wall-guide",
+  "title": "How to Create the Perfect Gallery Wall — Step by Step",
+  "excerpt": "A well-designed gallery wall turns a blank space into a curated art collection. Here's exactly how to plan, lay out, and hang one like a pro.",
+  "category": "Gallery Walls",
+  "tags": ["gallery wall", "frames", "art arrangement", "layout", "tips"],
+  "coverImage": "https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800&q=80",
+  "date": "2025-02-18",
+  "affiliateLink": "https://example.com/frames",
+  "content": [
+    {
+      "id": "1",
+      "type": "heading",
+      "props": { "level": "h2", "text": "Planning Your Layout Before You Hammer" }
+    },
+    {
+      "id": "2",
+      "type": "paragraph",
+      "props": { "text": "The secret to a stunning gallery wall is rarely luck. It's planning. Before you put a single nail in the drywall, you need to map out your arrangement. The easiest way? Trace your frames onto kraft paper, cut them out, and use painter's tape to arrange them on the wall." }
+    },
+    {
+      "id": "3",
+      "type": "list",
+      "props": {
+        "style": "ordered",
+        "items": [
+          "Choose an anchor piece (your largest or favorite art)",
+          "Build outward from the anchor, maintaining 2-3 inches of spacing between frames",
+          "Mix frame sizes but coordinate colors (e.g., all black, or mixed metallics)",
+          "Include a non-art object (like a small mirror or wall planter) for dimension"
+        ]
+      }
+    },
+    {
+      "id": "4",
+      "type": "cta",
+      "props": { "title": "Need a Starter Kit?", "text": "This 10-piece gallery wall frame set takes the guesswork out of sizing.", "buttonText": "Shop Frame Set", "url": "https://example.com/frames", "style": "accent" }
+    }
+  ]
+}

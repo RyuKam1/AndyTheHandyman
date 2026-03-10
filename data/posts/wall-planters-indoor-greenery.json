@@ -1,0 +1,17 @@
+{
+  "slug": "wall-planters-indoor-greenery",
+  "title": "Wall Planters: Bring Nature Indoors With Living Walls",
+  "excerpt": "Wall-mounted planters let you turn any vertical surface into a lush, living display. Here are the best systems for every skill level.",
+  "category": "Wall Planters",
+  "tags": ["planters", "plants", "indoor garden", "living wall", "greenery"],
+  "coverImage": "https://images.unsplash.com/photo-1545241047-6083a3684587?w=800&q=80",
+  "date": "2024-12-01",
+  "affiliateLink": "https://example.com/planters",
+  "content": [
+    {
+      "id": "1",
+      "type": "paragraph",
+      "props": { "text": "Running out of floor space for your plants? Move them to the walls. We tested self-watering and standard wall planters to find the best options." }
+    }
+  ]
+}

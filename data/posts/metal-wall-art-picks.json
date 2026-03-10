@@ -1,0 +1,17 @@
+{
+  "slug": "metal-wall-art-picks",
+  "title": "Metal Wall Art: Modern Pieces That Make a Statement",
+  "excerpt": "From abstract geometric shapes to nature-inspired designs, metal wall art adds a bold, modern edge to any room.",
+  "category": "Wall Art",
+  "tags": ["metal art", "wall art", "modern", "geometric", "sculpture"],
+  "coverImage": "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=800&q=80",
+  "date": "2024-12-15",
+  "affiliateLink": "https://example.com/metal-art",
+  "content": [
+    {
+      "id": "1",
+      "type": "paragraph",
+      "props": { "text": "Metal art provides a beautiful textural contrast to soft fabrics and smooth paint. We've rounded up the best modern pieces for your living room." }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "slug": "decorative-mirrors-roundup",
+  "title": "10 Stunning Decorative Mirrors That Double Your Space",
+  "excerpt": "Mirrors aren't just functional — the right decorative mirror can make a room feel twice as big and infinitely more stylish.",
+  "category": "Mirrors",
+  "tags": ["mirrors", "decorative", "space", "wall decor", "illusion"],
+  "coverImage": "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=80",
+  "date": "2025-02-05",
+  "affiliateLink": "https://example.com/mirrors",
+  "content": [
+    {
+      "id": "1",
+      "type": "heading",
+      "props": { "level": "h2", "text": "The Spatial Magic of Mirrors" }
+    },
+    {
+      "id": "2",
+      "type": "paragraph",
+      "props": { "text": "Designers have used mirrors for centuries to fake square footage. By placing a large, stylized mirror opposite a window, you instantly bounce more natural light into the space and create the illusion of depth." }
+    },
+    {
+      "id": "3",
+      "type": "rating",
+      "props": { "score": 4.9, "max": 5, "reviewCount": 1200, "label": "Our Top Pick: The Arched Gold Mantel Mirror" }
+    },
+    {
+      "id": "4",
+      "type": "blockquote",
+      "props": { "text": "\"This mirror completely transfored my entryway. It looks like it cost triple what I paid!\"", "author": "Verified Buyer" }
+    },
+    {
+      "id": "5",
+      "type": "cta",
+      "props": { "title": "Shop Our #1 Mirror Pick", "text": "Available in Brass, Black, and Silver.", "buttonText": "View on Store", "url": "https://example.com/mirrors", "style": "primary" }
+    }
+  ]
+}

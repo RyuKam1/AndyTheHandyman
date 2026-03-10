@@ -1,0 +1,17 @@
+{
+  "slug": "tapestry-wall-hanging-guide",
+  "title": "Tapestry Wall Hangings: The Ultimate Boho Statement Piece",
+  "excerpt": "Large-format tapestries cover huge wall spaces for minimal cost and maximum visual impact. Here's how to choose and hang the perfect one.",
+  "category": "Macramé & Textiles",
+  "tags": ["tapestry", "boho", "wall hanging", "textile", "large format"],
+  "coverImage": "https://images.unsplash.com/photo-1615873968403-89e068629265?w=800&q=80",
+  "date": "2024-11-18",
+  "affiliateLink": "https://example.com/tapestry",
+  "content": [
+    {
+      "id": "1",
+      "type": "paragraph",
+      "props": { "text": "Tapestries are the perfect solution for apartment dwellers looking to cover a large blank wall without painting or spending hundreds on framed art." }
+    }
+  ]
+}
