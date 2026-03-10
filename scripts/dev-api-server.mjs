@@ -25,6 +25,7 @@ async function start() {
   const [
     { default: postsHandler },
     { default: postBySlugHandler },
+    { default: postBySlugQueryHandler },
     { default: relatedHandler },
     { default: categoriesHandler },
     { default: imageProxyHandler },
@@ -33,6 +34,7 @@ async function start() {
     await Promise.all([
       import('../api/posts/index.js'),
       import('../api/posts/[slug].js'),
+      import('../api/posts/by-slug.js'),
       import('../api/posts/related.js'),
       import('../api/categories.js'),
       import('../api/image-proxy.js'),
@@ -42,6 +44,8 @@ async function start() {
   app.get('/api/posts/related', withHandler(relatedHandler));
   app.get('/api/posts/:slug', withHandler(postBySlugHandler));
   app.delete('/api/posts/:slug', withHandler(postBySlugHandler));
+  app.get('/api/posts/by-slug', withHandler(postBySlugQueryHandler));
+  app.delete('/api/posts/by-slug', withHandler(postBySlugQueryHandler));
   app.get('/api/posts', withHandler(postsHandler));
   app.post('/api/posts', withHandler(postsHandler));
   app.get('/api/categories', withHandler(categoriesHandler));

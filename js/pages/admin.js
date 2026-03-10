@@ -647,8 +647,18 @@ function initEditor() {
         const slug = decodeURIComponent(editBtn.dataset.slug || '');
         if (!slug) return;
         try {
-          const res = await fetch(`/api/posts/${encodeURIComponent(slug)}`);
-          if (!res.ok) throw new Error(`Failed to load post (${res.status})`);
+          const res = await fetch(`/api/posts/by-slug?slug=${encodeURIComponent(slug)}`);
+          if (!res.ok) {
+            let message = `Failed to load post (${res.status})`;
+            const txt = await res.text();
+            try {
+              const parsed = JSON.parse(txt);
+              if (parsed?.error) message = parsed.error;
+            } catch {
+              if (txt.includes('<!DOCTYPE')) message = 'API returned HTML instead of JSON. Check Vercel routing for /api/*.';
+            }
+            throw new Error(message);
+          }
           const data = await res.json();
           loadPostData(data);
           showToast(`✏️ Editing: ${data.title || slug}`);
@@ -663,7 +673,7 @@ function initEditor() {
         if (!slug) return;
         if (!confirm(`Delete post "${slug}"? This cannot be undone.`)) return;
         try {
-          const res = await fetch(`/api/posts/${encodeURIComponent(slug)}`, {
+          const res = await fetch(`/api/posts/by-slug?slug=${encodeURIComponent(slug)}`, {
             method: 'DELETE',
             headers: { 'x-admin-key': adminApiKey },
           });

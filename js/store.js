@@ -39,7 +39,7 @@ export async function getPost(slug) {
   if (postCache.has(slug)) return postCache.get(slug);
 
   try {
-    const post = await fetchJSON(`/api/posts/${encodeURIComponent(slug)}`);
+    const post = await fetchJSON(`/api/posts/by-slug?slug=${encodeURIComponent(slug)}`);
     postCache.set(slug, post);
     return post;
   } catch (err) {
