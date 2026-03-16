@@ -12,6 +12,7 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   font-size: 16px;
+  overflow-x: clip;
 }
 
 body {
@@ -99,6 +100,15 @@ button {
   background: none;
 }
 
+button,
+a,
+input[type="button"],
+input[type="submit"],
+summary,
+[role="button"] {
+  touch-action: manipulation;
+}
+
 /* ---- Utility ---- */
 .container {
   width: 100%;
@@ -129,11 +139,17 @@ button {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .page-content {
   flex: 1;
   padding-top: var(--header-height);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .page-enter {

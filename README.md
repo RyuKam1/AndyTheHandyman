@@ -48,6 +48,9 @@ npm run dev:api
 - `GET /api/categories` - categories list
 - `GET /api/health` - deployment database health check
 - `POST /api/posts` - create/update post (requires `x-admin-key`)
+- `POST /api/analytics/event` - ingest analytics events (page views, impressions, time spent)
+- `GET /api/analytics/summary` - aggregated analytics summary (`from`, `to` optional)
+- `DELETE /api/analytics/summary` - clear analytics data (`x-admin-key` required, supports `all=true` or date range)
 
 ## Database optimization choices
 

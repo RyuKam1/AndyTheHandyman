@@ -6,7 +6,8 @@ dotenv.config({ path: '.env.local' });
 const app = express();
 const port = Number.parseInt(process.env.LOCAL_API_PORT || '3000', 10);
 
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 function withHandler(handler) {
   return async (req, res) => {
@@ -30,6 +31,8 @@ async function start() {
     { default: categoriesHandler },
     { default: imageProxyHandler },
     { default: healthHandler },
+    { default: analyticsEventHandler },
+    { default: analyticsSummaryHandler },
   ] =
     await Promise.all([
       import('../api/posts/index.js'),
@@ -39,6 +42,8 @@ async function start() {
       import('../api/categories.js'),
       import('../api/image-proxy.js'),
       import('../api/health.js'),
+      import('../api/analytics/event.js'),
+      import('../api/analytics/summary.js'),
     ]);
 
   app.get('/api/posts/related', withHandler(relatedHandler));
@@ -51,6 +56,9 @@ async function start() {
   app.get('/api/categories', withHandler(categoriesHandler));
   app.get('/api/image-proxy', withHandler(imageProxyHandler));
   app.get('/api/health', withHandler(healthHandler));
+  app.post('/api/analytics/event', withHandler(analyticsEventHandler));
+  app.get('/api/analytics/summary', withHandler(analyticsSummaryHandler));
+  app.delete('/api/analytics/summary', withHandler(analyticsSummaryHandler));
 
   const server = app.listen(port, () => {
     console.log(`Local API server listening on http://localhost:${port}`);

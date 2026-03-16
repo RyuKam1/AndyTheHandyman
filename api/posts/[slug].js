@@ -54,8 +54,8 @@ export default async function handler(req, res) {
     }
 
     const rows = await sql`
-      SELECT slug, title, subtitle, author, category, tags, published_on, cover_image, excerpt,
-             affiliate_url, affiliate_button_text, seo_title, seo_description, content, featured_rank
+      SELECT slug, title, subtitle, author, category, tags, published_on, cover_image, cover_image_selected, cover_image_library, cover_image_variants, cover_image_crops, cover_image_post_ratio, cover_image_display_ratios, cover_image_custom_enabled, cover_image_custom_size, excerpt,
+             affiliate_url, affiliate_button_text, affiliate_button_align, affiliate_button_bg_color, affiliate_button_text_color, seo_title, seo_description, content, featured_rank
       FROM posts
       WHERE slug = ${safeSlug}
       LIMIT 1

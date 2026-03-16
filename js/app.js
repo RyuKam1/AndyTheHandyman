@@ -9,7 +9,9 @@ import { renderFooter } from './components/footer.js';
 import { renderHomePage } from './pages/home.js';
 import { renderPostPage } from './pages/post.js';
 import { renderAdminPage } from './pages/admin.js';
+import { renderAdminAnalyticsPage } from './pages/adminAnalytics.js';
 import { initTheme } from './utils/theme.js';
+import { initAnalyticsTracking } from './utils/analytics.js';
 
 /**
  * Initialize the application.
@@ -42,8 +44,13 @@ function init() {
     return await renderAdminPage();
   });
 
+  addRoute('/admin/analytics', async () => {
+    return await renderAdminAnalyticsPage();
+  });
+
   // Start router
   initRouter();
+  initAnalyticsTracking();
 }
 
 // Boot

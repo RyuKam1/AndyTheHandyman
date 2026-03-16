@@ -30,9 +30,20 @@ async function ensureSchema() {
       tags TEXT[] NOT NULL DEFAULT '{}',
       published_on DATE NOT NULL,
       cover_image TEXT,
+      cover_image_selected TEXT,
+      cover_image_library JSONB NOT NULL DEFAULT '[]'::jsonb,
+      cover_image_variants JSONB NOT NULL DEFAULT '{}'::jsonb,
+      cover_image_crops JSONB NOT NULL DEFAULT '{}'::jsonb,
+      cover_image_post_ratio VARCHAR(32),
+      cover_image_display_ratios JSONB NOT NULL DEFAULT '[]'::jsonb,
+      cover_image_custom_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+      cover_image_custom_size JSONB NOT NULL DEFAULT '{"width":1200,"height":675}'::jsonb,
       excerpt VARCHAR(420) NOT NULL,
       affiliate_url TEXT,
       affiliate_button_text VARCHAR(80),
+      affiliate_button_align VARCHAR(10),
+      affiliate_button_bg_color VARCHAR(24),
+      affiliate_button_text_color VARCHAR(24),
       seo_title VARCHAR(180),
       seo_description VARCHAR(420),
       content JSONB NOT NULL,
@@ -47,6 +58,17 @@ async function ensureSchema() {
   await sql`CREATE INDEX IF NOT EXISTS idx_posts_category_published ON posts (category, published_on DESC);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_posts_featured_rank_partial ON posts (featured_rank) WHERE featured_rank IS NOT NULL;`;
   await sql`CREATE INDEX IF NOT EXISTS idx_posts_tags_gin ON posts USING GIN (tags);`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS affiliate_button_align VARCHAR(10);`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS affiliate_button_bg_color VARCHAR(24);`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS affiliate_button_text_color VARCHAR(24);`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS cover_image_selected TEXT;`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS cover_image_library JSONB NOT NULL DEFAULT '[]'::jsonb;`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS cover_image_variants JSONB NOT NULL DEFAULT '{}'::jsonb;`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS cover_image_crops JSONB NOT NULL DEFAULT '{}'::jsonb;`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS cover_image_post_ratio VARCHAR(32);`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS cover_image_display_ratios JSONB NOT NULL DEFAULT '[]'::jsonb;`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS cover_image_custom_enabled BOOLEAN NOT NULL DEFAULT FALSE;`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS cover_image_custom_size JSONB NOT NULL DEFAULT '{"width":1200,"height":675}'::jsonb;`;
 }
 
 async function readPostFiles() {
@@ -78,13 +100,13 @@ async function seed() {
     await sql`
       INSERT INTO posts (
         slug, title, subtitle, author, category, tags, published_on,
-        cover_image, excerpt, affiliate_url, affiliate_button_text,
+        cover_image, cover_image_selected, cover_image_library, cover_image_variants, cover_image_crops, cover_image_post_ratio, cover_image_display_ratios, cover_image_custom_enabled, cover_image_custom_size, excerpt, affiliate_url, affiliate_button_text, affiliate_button_align, affiliate_button_bg_color, affiliate_button_text_color,
         seo_title, seo_description, content, featured_rank, updated_at
       )
       VALUES (
         ${post.slug}, ${post.title}, ${post.subtitle || null}, ${post.author}, ${post.category}, ${post.tags},
-        ${post.publishedOn}, ${post.coverImage || null}, ${post.excerpt || ""}, ${post.affiliateUrl || null},
-        ${post.affiliateButtonText || null}, ${post.seoTitle || null}, ${post.seoDescription || null},
+        ${post.publishedOn}, ${post.coverImage || null}, ${post.coverImageSelected || null}, ${JSON.stringify(post.coverImageLibrary || [])}, ${JSON.stringify(post.coverImageVariants || {})}, ${JSON.stringify(post.coverImageCrops || {})}, ${post.coverImagePostRatio || "ratio-16-9"}, ${JSON.stringify(post.coverImageDisplayRatios || [])}, ${Boolean(post.coverImageCustomEnabled)}, ${JSON.stringify(post.coverImageCustomSize || { width: 1200, height: 675 })}, ${post.excerpt || ""}, ${post.affiliateUrl || null},
+        ${post.affiliateButtonText || null}, ${post.affiliateButtonAlign || null}, ${post.affiliateButtonBgColor || null}, ${post.affiliateButtonTextColor || null}, ${post.seoTitle || null}, ${post.seoDescription || null},
         ${JSON.stringify(post.content)}, ${post.featuredRank}, now()
       )
       ON CONFLICT (slug)
@@ -96,9 +118,20 @@ async function seed() {
         tags = EXCLUDED.tags,
         published_on = EXCLUDED.published_on,
         cover_image = EXCLUDED.cover_image,
+        cover_image_selected = EXCLUDED.cover_image_selected,
+        cover_image_library = EXCLUDED.cover_image_library,
+        cover_image_variants = EXCLUDED.cover_image_variants,
+        cover_image_crops = EXCLUDED.cover_image_crops,
+        cover_image_post_ratio = EXCLUDED.cover_image_post_ratio,
+        cover_image_display_ratios = EXCLUDED.cover_image_display_ratios,
+        cover_image_custom_enabled = EXCLUDED.cover_image_custom_enabled,
+        cover_image_custom_size = EXCLUDED.cover_image_custom_size,
         excerpt = EXCLUDED.excerpt,
         affiliate_url = EXCLUDED.affiliate_url,
         affiliate_button_text = EXCLUDED.affiliate_button_text,
+        affiliate_button_align = EXCLUDED.affiliate_button_align,
+        affiliate_button_bg_color = EXCLUDED.affiliate_button_bg_color,
+        affiliate_button_text_color = EXCLUDED.affiliate_button_text_color,
         seo_title = EXCLUDED.seo_title,
         seo_description = EXCLUDED.seo_description,
         content = EXCLUDED.content,

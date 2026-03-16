@@ -7,7 +7,10 @@ let postsIndex = null;
 const postCache = new Map();
 
 async function fetchJSON(url, options = {}) {
-  const res = await fetch(url, options);
+  const res = await fetch(url, {
+    cache: 'no-store',
+    ...options,
+  });
   if (!res.ok) {
     throw new Error(`Request failed (${res.status}) for ${url}`);
   }

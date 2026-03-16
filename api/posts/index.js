@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       const searchArg = search || null;
 
       const rows = await sql`
-        SELECT slug, title, excerpt, category, tags, cover_image, published_on, featured_rank, content
+        SELECT slug, title, excerpt, category, tags, cover_image, cover_image_selected, cover_image_library, cover_image_variants, cover_image_crops, cover_image_post_ratio, cover_image_display_ratios, cover_image_custom_enabled, cover_image_custom_size, published_on, featured_rank, content
         FROM posts
         WHERE (${categoryArg}::varchar IS NULL OR category = ${categoryArg})
           AND (
@@ -87,13 +87,13 @@ export default async function handler(req, res) {
         await sql`
           INSERT INTO posts (
             slug, title, subtitle, author, category, tags, published_on,
-            cover_image, excerpt, affiliate_url, affiliate_button_text,
+            cover_image, cover_image_selected, cover_image_library, cover_image_variants, cover_image_crops, cover_image_post_ratio, cover_image_display_ratios, cover_image_custom_enabled, cover_image_custom_size, excerpt, affiliate_url, affiliate_button_text, affiliate_button_align, affiliate_button_bg_color, affiliate_button_text_color,
             seo_title, seo_description, content, featured_rank, updated_at
           )
           VALUES (
             ${post.slug}, ${post.title}, ${post.subtitle || null}, ${post.author}, ${post.category}, ${post.tags},
-            ${post.publishedOn}, ${post.coverImage || null}, ${post.excerpt || ""}, ${post.affiliateUrl || null},
-            ${post.affiliateButtonText || null}, ${post.seoTitle || null}, ${post.seoDescription || null},
+            ${post.publishedOn}, ${post.coverImage || null}, ${post.coverImageSelected || null}, ${JSON.stringify(post.coverImageLibrary || [])}, ${JSON.stringify(post.coverImageVariants || {})}, ${JSON.stringify(post.coverImageCrops || {})}, ${post.coverImagePostRatio || "ratio-16-9"}, ${JSON.stringify(post.coverImageDisplayRatios || [])}, ${Boolean(post.coverImageCustomEnabled)}, ${JSON.stringify(post.coverImageCustomSize || { width: 1200, height: 675 })}, ${post.excerpt || ""}, ${post.affiliateUrl || null},
+            ${post.affiliateButtonText || null}, ${post.affiliateButtonAlign || "center"}, ${post.affiliateButtonBgColor || null}, ${post.affiliateButtonTextColor || null}, ${post.seoTitle || null}, ${post.seoDescription || null},
             ${JSON.stringify(post.content)}, ${post.featuredRank}, now()
           )
           ON CONFLICT (slug)
@@ -105,9 +105,20 @@ export default async function handler(req, res) {
             tags = EXCLUDED.tags,
             published_on = EXCLUDED.published_on,
             cover_image = EXCLUDED.cover_image,
+            cover_image_selected = EXCLUDED.cover_image_selected,
+            cover_image_library = EXCLUDED.cover_image_library,
+            cover_image_variants = EXCLUDED.cover_image_variants,
+            cover_image_crops = EXCLUDED.cover_image_crops,
+            cover_image_post_ratio = EXCLUDED.cover_image_post_ratio,
+            cover_image_display_ratios = EXCLUDED.cover_image_display_ratios,
+            cover_image_custom_enabled = EXCLUDED.cover_image_custom_enabled,
+            cover_image_custom_size = EXCLUDED.cover_image_custom_size,
             excerpt = EXCLUDED.excerpt,
             affiliate_url = EXCLUDED.affiliate_url,
             affiliate_button_text = EXCLUDED.affiliate_button_text,
+            affiliate_button_align = EXCLUDED.affiliate_button_align,
+            affiliate_button_bg_color = EXCLUDED.affiliate_button_bg_color,
+            affiliate_button_text_color = EXCLUDED.affiliate_button_text_color,
             seo_title = EXCLUDED.seo_title,
             seo_description = EXCLUDED.seo_description,
             content = EXCLUDED.content,
