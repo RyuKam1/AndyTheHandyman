@@ -210,8 +210,14 @@ export function normalizeIncomingPost(payload = {}) {
     ? requestedSelectedId
     : String(coverImageLibrary[0]?.id || "");
 
-  const coverImageVariants = normalizeCoverImageVariants(payload.coverImageVariants);
-  const coverImageCrops = normalizeCoverImageCrops(payload.coverImageCrops);
+  const coverImageVariants = normalizeCoverImageVariants(
+    payload.coverImageVariants,
+    coverImageSelected,
+  );
+  const coverImageCrops = normalizeCoverImageCrops(
+    payload.coverImageCrops,
+    coverImageSelected,
+  );
   const coverImagePostRatio =
     typeof payload.coverImagePostRatio === "string" &&
     RATIO_KEYS.has(payload.coverImagePostRatio)
@@ -272,19 +278,14 @@ export function normalizeIncomingPost(payload = {}) {
   };
 }
 
-function normalizeCoverImageVariants(value) {
+function normalizeCoverImageVariants(value, preferredSourceId = "") {
   if (!value || typeof value !== "object") return {};
   const entries = Object.entries(value);
-  const directRatioMode = entries.some(
-    ([key, v]) => RATIO_KEYS.has(String(key)) && typeof v === "string" && v.trim(),
+  const directMap = Object.fromEntries(
+    entries
+      .filter(([key, v]) => RATIO_KEYS.has(String(key)) && typeof v === "string" && v.trim())
+      .map(([key, v]) => [String(key), String(v).trim()]),
   );
-  if (directRatioMode) {
-    return Object.fromEntries(
-      entries
-        .filter(([key, v]) => RATIO_KEYS.has(String(key)) && typeof v === "string" && v.trim())
-        .map(([key, v]) => [String(key), String(v).trim()]),
-    );
-  }
 
   const nested = {};
   for (const [sourceId, ratioMap] of entries) {
@@ -296,7 +297,12 @@ function normalizeCoverImageVariants(value) {
     );
     if (Object.keys(cleaned).length) nested[sourceId.slice(0, 120)] = cleaned;
   }
-  return nested;
+  const preferredKey = String(preferredSourceId || "").trim();
+  if (preferredKey && nested[preferredKey]) {
+    return { [preferredKey]: { ...directMap, ...nested[preferredKey] } };
+  }
+  if (Object.keys(nested).length) return nested;
+  return directMap;
 }
 
 function normalizeCustomSize(value) {
@@ -307,19 +313,14 @@ function normalizeCustomSize(value) {
   return { width, height };
 }
 
-function normalizeCoverImageCrops(value) {
+function normalizeCoverImageCrops(value, preferredSourceId = "") {
   if (!value || typeof value !== "object") return {};
   const entries = Object.entries(value);
-  const directRatioMode = entries.some(
-    ([key, v]) => RATIO_KEYS.has(String(key)) && v && typeof v === "object",
+  const directMap = Object.fromEntries(
+    entries
+      .filter(([key, v]) => RATIO_KEYS.has(String(key)) && v && typeof v === "object")
+      .map(([key, v]) => [String(key), normalizeSingleCrop(v)]),
   );
-  if (directRatioMode) {
-    return Object.fromEntries(
-      entries
-        .filter(([key, v]) => RATIO_KEYS.has(String(key)) && v && typeof v === "object")
-        .map(([key, v]) => [String(key), normalizeSingleCrop(v)]),
-    );
-  }
   const nested = {};
   for (const [sourceId, ratioMap] of entries) {
     if (typeof sourceId !== "string" || !ratioMap || typeof ratioMap !== "object") continue;
@@ -330,7 +331,12 @@ function normalizeCoverImageCrops(value) {
     );
     if (Object.keys(cleaned).length) nested[sourceId.slice(0, 120)] = cleaned;
   }
-  return nested;
+  const preferredKey = String(preferredSourceId || "").trim();
+  if (preferredKey && nested[preferredKey]) {
+    return { [preferredKey]: { ...directMap, ...nested[preferredKey] } };
+  }
+  if (Object.keys(nested).length) return nested;
+  return directMap;
 }
 
 function normalizeSingleCrop(value) {

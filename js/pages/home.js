@@ -187,12 +187,16 @@ async function initHomePage() {
       `${sessionSeed}|${activeCategory}|${activeSort}|${query}`,
     );
     bentoGrid.innerHTML = posts
-      .map((post, i) =>
-        renderBentoCard(post, i, {
-          sizeClass: layoutPlan[i] || '',
+      .map((post, i) => {
+        const layoutSlot = layoutPlan[i] || {};
+        return renderBentoCard(post, i, {
+          sizeClass: layoutSlot.sizeClass || '',
+          shapeClass: layoutSlot.shapeClass || '',
+          styleClass: layoutSlot.styleClass || '',
+          imageContext: layoutSlot.imageContext || '',
           sessionSeed,
-        }),
-      )
+        });
+      })
       .join('');
     applyCropTransforms(bentoGrid);
     bindImpressionTracking(bentoGrid);
@@ -270,21 +274,42 @@ function renderFeaturedSecondary(post) {
 /* ============================================
    Bento card renderer
    ============================================ */
-function renderBentoCard(post, index, { sizeClass = '', sessionSeed = '' } = {}) {
+function renderBentoCard(
+  post,
+  index,
+  {
+    sizeClass = '',
+    shapeClass = '',
+    styleClass = '',
+    imageContext = '',
+    sessionSeed = '',
+  } = {},
+) {
   const date = formatDate(post.date);
   const time = readingTime(post.contentPreview || []);
-  const image = resolveCardImage(post, {
-    context: sizeClass === 'bento-card-large'
+  const initialContext = imageContext || (
+    sizeClass === 'bento-card-large'
       ? 'bento-large'
       : sizeClass === 'bento-card-horizontal'
         ? 'bento-horizontal'
-        : 'bento-normal',
+        : 'bento-normal'
+  );
+  const normalizedDesign = normalizeCardDesignForDisplayRatios(post, {
+    sizeClass,
+    shapeClass,
+    imageContext: initialContext,
+  });
+  const image = resolveCardImage(post, {
+    context: normalizedDesign.imageContext,
     index,
     sessionSeed,
   });
+  const cardClasses = ['bento-card', normalizedDesign.sizeClass, normalizedDesign.shapeClass, styleClass]
+    .filter(Boolean)
+    .join(' ');
 
   return `
-    <article class="bento-card ${sizeClass}" data-impression-slug="${post.slug}" data-impression-kind="listing-card" onclick="window.location.hash='#/post/${post.slug}'" role="link" tabindex="0" aria-label="Read about ${post.title}">
+    <article class="${cardClasses}" data-impression-slug="${post.slug}" data-impression-kind="listing-card" onclick="window.location.hash='#/post/${post.slug}'" role="link" tabindex="0" aria-label="Read about ${post.title}">
       <div class="bento-card-image-wrapper">
         <img
           class="bento-card-img"
@@ -334,84 +359,44 @@ function bindImpressionTracking(root) {
 }
 
 function resolveCardImage(post, { context = 'bento-normal', index = 0, sessionSeed = '' } = {}) {
-  const variants = getVariantMap(post);
   const crops = getCropMap(post);
   const selectedLibraryImage = resolveSelectedLibraryImage(post);
-  const sourceImage = selectedLibraryImage || resolveFirstLibraryImage(post);
+  const sourceImage = selectedLibraryImage
+    || resolveFirstLibraryImage(post)
+    || (typeof post?.coverImage === 'string' ? post.coverImage.trim() : '');
   const displaySet = getDisplayRatioSet(post);
   const orderByContext = {
     'featured-primary': ['ratio-21-9', 'ratio-16-10', 'ratio-16-9', 'ratio-3-2', 'ratio-4-3', 'ratio-5-4', 'ratio-4-5', 'ratio-1-1', 'ratio-3-4'],
     'featured-secondary': ['ratio-4-5', 'ratio-3-4', 'ratio-5-4', 'ratio-1-1', 'ratio-4-3', 'ratio-3-2', 'ratio-16-9'],
     'bento-large': ['ratio-21-9', 'ratio-16-10', 'ratio-16-9', 'ratio-3-2', 'ratio-4-3', 'ratio-4-5'],
     'bento-horizontal': ['ratio-16-10', 'ratio-16-9', 'ratio-3-2', 'ratio-21-9', 'ratio-4-3', 'ratio-5-4', 'ratio-4-5'],
+    'bento-portrait': ['ratio-4-5', 'ratio-3-4', 'ratio-5-4', 'ratio-1-1', 'ratio-4-3', 'ratio-3-2'],
+    'bento-tall': ['ratio-3-4', 'ratio-4-5', 'ratio-1-1', 'ratio-5-4', 'ratio-4-3'],
+    'bento-square': ['ratio-1-1', 'ratio-5-4', 'ratio-4-5', 'ratio-4-3', 'ratio-3-2'],
+    'bento-landscape': ['ratio-4-3', 'ratio-3-2', 'ratio-16-10', 'ratio-16-9', 'ratio-5-4', 'ratio-1-1'],
+    'bento-cinematic': ['ratio-21-9', 'ratio-16-9', 'ratio-16-10', 'ratio-3-2', 'ratio-4-3'],
     'bento-normal': index % 2 === 0
       ? ['ratio-4-5', 'ratio-5-4', 'ratio-1-1', 'ratio-3-4', 'ratio-4-3', 'ratio-3-2', 'ratio-16-9']
       : ['ratio-1-1', 'ratio-5-4', 'ratio-4-5', 'ratio-3-4', 'ratio-4-3', 'ratio-3-2', 'ratio-16-9'],
   };
   const order = orderByContext[context] || orderByContext['bento-normal'];
+  const enabledOrder = order.filter((key) => displaySet.has(key));
+  const candidateOrder = enabledOrder.length
+    ? enabledOrder
+    : getGlobalDisplayRatioOrder(displaySet, order);
 
-  // Bento cards: randomly choose among Display-enabled ratios
-  // while biasing toward context-preferred ratios for a better visual rhythm.
-  if (context.startsWith('bento')) {
-    const availableDisplayKeys = order.filter((key) => {
-      if (!displaySet.has(key)) return false;
-      const cropValue = crops[key];
-      if (cropValue && typeof cropValue === 'object') return true;
-      const value = variants[key];
-      return typeof value === 'string' && value.trim();
-    });
-    if (availableDisplayKeys.length) {
-      const chosenKey = pickWeightedRandomRatioKey(
-        availableDisplayKeys,
-        order,
-        `${sessionSeed}|${post?.slug || 'post'}|${context}|${index}`,
-      );
-      const chosenCrop = crops[chosenKey];
-      const chosenValue = variants[chosenKey];
-      if (sourceImage || (typeof chosenValue === 'string' && chosenValue.trim())) {
-        return {
-          src:
-            sourceImage && chosenCrop
-              ? sourceImage
-              : (typeof chosenValue === 'string' && chosenValue.trim())
-                ? chosenValue
-                : sourceImage,
-          crop: chosenCrop && typeof chosenCrop === 'object' ? chosenCrop : null,
-        };
-      }
-    }
-  }
-
-  for (const key of order) {
-    if (!displaySet.has(key)) continue;
+  // 1) Prefer enabled ratios with explicit crop data (what users edited in cropper).
+  const cropCandidates = candidateOrder.filter((key) => {
     const cropValue = crops[key];
-    const value = variants[key];
-    if ((sourceImage && cropValue) || (typeof value === 'string' && value.trim())) {
-      return {
-        src:
-          sourceImage && cropValue
-            ? sourceImage
-            : (typeof value === 'string' && value.trim())
-              ? value
-              : sourceImage,
-        crop: cropValue && typeof cropValue === 'object' ? cropValue : null,
-      };
-    }
-  }
-  for (const key of order) {
-    const cropValue = crops[key];
-    const value = variants[key];
-    if ((sourceImage && cropValue) || (typeof value === 'string' && value.trim())) {
-      return {
-        src:
-          sourceImage && cropValue
-            ? sourceImage
-            : (typeof value === 'string' && value.trim())
-              ? value
-              : sourceImage,
-        crop: cropValue && typeof cropValue === 'object' ? cropValue : null,
-      };
-    }
+    return sourceImage && cropValue && typeof cropValue === 'object';
+  });
+  if (cropCandidates.length) {
+    const chosenKey = pickBestCropKey(cropCandidates, candidateOrder, crops);
+    const chosenCrop = crops[chosenKey];
+    return {
+      src: sourceImage,
+      crop: chosenCrop && typeof chosenCrop === 'object' ? chosenCrop : null,
+    };
   }
 
   if (sourceImage) {
@@ -424,36 +409,99 @@ function resolveCardImage(post, { context = 'bento-normal', index = 0, sessionSe
   return { src: 'https://placehold.co/800x500/E0DCD5/6B6B6B?text=No+Image', crop: null };
 }
 
-function getVariantMap(post) {
-  const root = post?.coverImageVariants && typeof post.coverImageVariants === 'object'
-    ? post.coverImageVariants
-    : {};
-  const selected = typeof post?.coverImageSelected === 'string' ? post.coverImageSelected : '';
-  if (selected && root[selected] && typeof root[selected] === 'object') {
-    return root[selected];
-  }
-  // Fallback when selected id is missing/outdated: use first nested map.
-  const firstNested = Object.values(root).find(
-    (value) => value && typeof value === 'object' && !Array.isArray(value),
-  );
-  if (firstNested) return firstNested;
-  const directKeys = Object.keys(root);
-  const hasDirectRatio = directKeys.some((k) => k.startsWith('ratio-') && typeof root[k] === 'string');
-  if (hasDirectRatio) return root;
-  return {};
+function getGlobalDisplayRatioOrder(displaySet, preferredOrder = []) {
+  const allKeys = [
+    'ratio-21-9',
+    'ratio-16-9',
+    'ratio-16-10',
+    'ratio-3-2',
+    'ratio-4-3',
+    'ratio-5-4',
+    'ratio-1-1',
+    'ratio-4-5',
+    'ratio-3-4',
+  ];
+  const preferred = Array.isArray(preferredOrder) ? preferredOrder : [];
+  const ordered = [...preferred, ...allKeys];
+  return [...new Set(ordered)].filter((key) => displaySet.has(key));
 }
 
 function getDisplayRatioSet(post) {
   const list = Array.isArray(post?.coverImageDisplayRatios)
     ? post.coverImageDisplayRatios
     : [];
-  if (!list.length) {
-    return new Set(['ratio-3-2', 'ratio-4-3', 'ratio-5-4', 'ratio-16-10', 'ratio-16-9', 'ratio-4-5', 'ratio-1-1', 'ratio-3-4', 'ratio-21-9']);
-  }
-  return new Set(
+  const normalized = new Set(
     list
       .map((v) => String(v))
       .filter((key) => key !== 'ratio-custom'),
+  );
+  if (normalized.size) return normalized;
+  return new Set(['ratio-16-9']);
+}
+
+function normalizeCardDesignForDisplayRatios(
+  post,
+  { sizeClass = '', shapeClass = '', imageContext = 'bento-normal' } = {},
+) {
+  const displaySet = getDisplayRatioSet(post);
+  let nextShape = shapeClass;
+  let nextSize = sizeClass;
+  let nextContext = imageContext;
+
+  const allowsUltraWide = displaySet.has('ratio-21-9');
+  const allowsLandscape = (
+    displaySet.has('ratio-16-9')
+    || displaySet.has('ratio-16-10')
+    || displaySet.has('ratio-3-2')
+    || displaySet.has('ratio-4-3')
+  );
+
+  if (!allowsUltraWide && nextShape === 'bento-shape-wide') {
+    nextShape = allowsLandscape ? 'bento-shape-landscape' : 'bento-shape-square';
+  }
+  if (!allowsUltraWide && nextContext === 'bento-cinematic') {
+    nextContext = allowsLandscape ? 'bento-landscape' : 'bento-square';
+  }
+  if (!allowsLandscape && nextShape === 'bento-shape-landscape') {
+    nextShape = 'bento-shape-square';
+  }
+  if (!allowsLandscape && nextContext === 'bento-landscape') {
+    nextContext = 'bento-square';
+  }
+  if (!allowsLandscape && nextSize === 'bento-card-horizontal') {
+    nextSize = '';
+    if (!nextShape || nextShape === 'bento-shape-landscape' || nextShape === 'bento-shape-wide') {
+      nextShape = 'bento-shape-square';
+    }
+    if (nextContext === 'bento-horizontal' || nextContext === 'bento-landscape' || nextContext === 'bento-cinematic') {
+      nextContext = 'bento-square';
+    }
+  }
+
+  return {
+    sizeClass: nextSize,
+    shapeClass: nextShape,
+    imageContext: nextContext,
+  };
+}
+
+function getFirstCropMap(root) {
+  if (!root || typeof root !== 'object') return {};
+  const nestedEntries = Object.entries(root).filter(
+    ([key, value]) => !key.startsWith('ratio-') && value && typeof value === 'object',
+  );
+  if (nestedEntries.length === 1) {
+    return nestedEntries[0][1];
+  }
+  return {};
+}
+
+function normalizeCropMap(map) {
+  if (!map || typeof map !== 'object') return {};
+  return Object.fromEntries(
+    Object.entries(map).filter(([key, value]) =>
+      key !== 'ratio-custom' && key.startsWith('ratio-') && value && typeof value === 'object',
+    ),
   );
 }
 
@@ -461,33 +509,21 @@ function getCropMap(post) {
   const root = post?.coverImageCrops && typeof post.coverImageCrops === 'object'
     ? post.coverImageCrops
     : {};
-  const selected = typeof post?.coverImageSelected === 'string' ? post.coverImageSelected : '';
+  const selected = getResolvedCoverId(post);
   if (selected && root[selected] && typeof root[selected] === 'object') {
-    return Object.fromEntries(
-      Object.entries(root[selected]).filter(([key]) => key !== 'ratio-custom'),
-    );
+    return normalizeCropMap(root[selected]);
   }
-  // Fallback when selected id is missing/outdated: use first nested map.
-  const firstNested = Object.values(root).find(
-    (value) => value && typeof value === 'object' && !Array.isArray(value),
-  );
-  if (firstNested) {
-    return Object.fromEntries(
-      Object.entries(firstNested).filter(([key]) => key !== 'ratio-custom'),
-    );
-  }
-  const directKeys = Object.keys(root);
-  const hasDirectRatio = directKeys.some(
-    (k) => k !== 'ratio-custom' && k.startsWith('ratio-') && typeof root[k] === 'object',
-  );
-  if (hasDirectRatio) {
-    return Object.fromEntries(
-      Object.entries(root).filter(
-        ([key, value]) => key !== 'ratio-custom' && key.startsWith('ratio-') && value && typeof value === 'object',
-      ),
-    );
-  }
-  return {};
+  const first = getFirstCropMap(root);
+  return normalizeCropMap(first);
+}
+
+function getResolvedCoverId(post) {
+  const selected = typeof post?.coverImageSelected === 'string' ? post.coverImageSelected.trim() : '';
+  if (selected) return selected;
+  if (!Array.isArray(post?.coverImageLibrary)) return '';
+  return typeof post.coverImageLibrary[0]?.id === 'string'
+    ? post.coverImageLibrary[0].id.trim()
+    : '';
 }
 
 function resolveSelectedLibraryImage(post) {
@@ -562,22 +598,34 @@ function applyCropTransforms(root) {
   });
 }
 
-function pickWeightedRandomRatioKey(keys, preferredOrder, seedBase) {
-  if (!Array.isArray(keys) || !keys.length) return '';
-  if (keys.length === 1) return keys[0];
-  const random = seededRandom(seedBase);
-  const weights = keys.map((key) => {
-    const rank = preferredOrder.indexOf(key);
-    if (rank < 0) return 1;
-    return Math.max(1, preferredOrder.length - rank);
+function pickBestCropKey(candidates, preferredOrder, cropMap) {
+  if (!Array.isArray(candidates) || !candidates.length) return '';
+  const rank = new Map(preferredOrder.map((key, i) => [key, i]));
+  let bestKey = candidates[0];
+  let bestScore = -Infinity;
+  let bestRank = Number.POSITIVE_INFINITY;
+  candidates.forEach((key) => {
+    const score = getCropSelectionWeight(cropMap[key]);
+    const orderRank = rank.has(key) ? rank.get(key) : Number.POSITIVE_INFINITY;
+    if (score > bestScore || (score === bestScore && orderRank < bestRank)) {
+      bestKey = key;
+      bestScore = score;
+      bestRank = orderRank;
+    }
   });
-  const total = weights.reduce((sum, w) => sum + w, 0);
-  let cursor = random * total;
-  for (let i = 0; i < keys.length; i += 1) {
-    cursor -= weights[i];
-    if (cursor <= 0) return keys[i];
-  }
-  return keys[keys.length - 1];
+  return bestKey;
+}
+
+function getCropSelectionWeight(crop) {
+  if (!crop || typeof crop !== 'object') return 1;
+  const zoom = Number.parseFloat(String(crop.zoom ?? 1));
+  const x = Number.parseFloat(String(crop.offsetXPct ?? 0));
+  const y = Number.parseFloat(String(crop.offsetYPct ?? 0));
+  const zoomDelta = Number.isFinite(zoom) ? Math.abs(zoom - 1) : 0;
+  const xDelta = Number.isFinite(x) ? Math.abs(x) : 0;
+  const yDelta = Number.isFinite(y) ? Math.abs(y) : 0;
+  const signal = zoomDelta + (xDelta + yDelta) / 30;
+  return signal > 0.04 ? 1 + Math.min(4, signal) : 1;
 }
 
 function seededRandom(input) {
@@ -603,7 +651,12 @@ function getBentoSessionSeed() {
 }
 
 function buildSessionBentoLayout(count, seedBase) {
-  const layout = new Array(Math.max(0, count)).fill('');
+  const layout = new Array(Math.max(0, count)).fill(null).map(() => ({
+    sizeClass: '',
+    shapeClass: '',
+    styleClass: '',
+    imageContext: 'bento-normal',
+  }));
   if (!count) return layout;
 
   // Ensure one hero-like card appears near the top.
@@ -611,19 +664,121 @@ function buildSessionBentoLayout(count, seedBase) {
     count - 1,
     Math.floor(seededRandom(`${seedBase}|hero-index`) * Math.min(3, count)),
   );
-  layout[heroIndex] = 'bento-card-large';
+  layout[heroIndex].sizeClass = 'bento-card-large';
+  layout[heroIndex].shapeClass = pickWeightedVariant(
+    ['bento-shape-landscape', 'bento-shape-wide'],
+    [6, 4],
+    `${seedBase}|shape|hero`,
+  );
+  layout[heroIndex].imageContext = layout[heroIndex].shapeClass === 'bento-shape-wide'
+    ? 'bento-cinematic'
+    : 'bento-large';
+  layout[heroIndex].styleClass = pickWeightedVariant(
+    ['bento-style-soft', 'bento-style-clean', 'bento-style-pop'],
+    [5, 3, 2],
+    `${seedBase}|style|hero`,
+  );
 
+  let previousShape = layout[heroIndex].shapeClass;
   for (let i = 0; i < count; i += 1) {
-    if (layout[i]) continue;
+    if (layout[i].sizeClass) continue;
     const r = seededRandom(`${seedBase}|slot|${i}`);
-    if (r > 0.78 && i > 0) {
-      layout[i] = 'bento-card-horizontal';
-    } else if (r > 0.93 && i > 1) {
-      layout[i] = 'bento-card-large';
-    } else {
-      layout[i] = '';
+    let sizeClass = '';
+    if (r > 0.8 && i > 0) {
+      sizeClass = 'bento-card-horizontal';
+    } else if (r > 0.95 && i > 1) {
+      sizeClass = 'bento-card-large';
     }
+    const shape = pickShapeForSlot(sizeClass, `${seedBase}|shape|${i}`, previousShape);
+    const style = pickWeightedVariant(
+      ['bento-style-clean', 'bento-style-soft', 'bento-style-pop'],
+      [5, 4, 2],
+      `${seedBase}|style|${i}`,
+    );
+    layout[i] = {
+      sizeClass,
+      shapeClass: shape,
+      styleClass: style,
+      imageContext: imageContextFromShape(shape, sizeClass),
+    };
+    previousShape = shape;
   }
 
   return layout;
+}
+
+function pickShapeForSlot(sizeClass, seed, previousShape = '') {
+  const presetsBySize = {
+    'bento-card-large': {
+      shapes: ['bento-shape-landscape', 'bento-shape-wide', 'bento-shape-square'],
+      weights: [6, 4, 1],
+    },
+    'bento-card-horizontal': {
+      shapes: ['bento-shape-landscape', 'bento-shape-wide', 'bento-shape-square'],
+      weights: [6, 3, 1],
+    },
+    normal: {
+      shapes: [
+        'bento-shape-portrait',
+        'bento-shape-tall',
+        'bento-shape-square',
+        'bento-shape-landscape',
+        'bento-shape-wide',
+      ],
+      weights: [5, 3, 3, 2, 1],
+    },
+  };
+  const preset = presetsBySize[sizeClass] || presetsBySize.normal;
+
+  let shape = pickWeightedVariant(preset.shapes, preset.weights, seed);
+  if (previousShape && shape === previousShape && preset.shapes.length > 1) {
+    // Nudge away from repeated adjacent card shapes.
+    shape = pickWeightedVariant(preset.shapes, preset.weights, `${seed}|retry`);
+    if (shape === previousShape) {
+      const nextIndex = (preset.shapes.indexOf(shape) + 1) % preset.shapes.length;
+      shape = preset.shapes[nextIndex];
+    }
+  }
+  return shape;
+}
+
+function imageContextFromShape(shapeClass, sizeClass) {
+  if (sizeClass === 'bento-card-large') {
+    if (shapeClass === 'bento-shape-wide') return 'bento-cinematic';
+    if (shapeClass === 'bento-shape-square') return 'bento-square';
+    return 'bento-large';
+  }
+  if (sizeClass === 'bento-card-horizontal') {
+    if (shapeClass === 'bento-shape-wide') return 'bento-cinematic';
+    if (shapeClass === 'bento-shape-square') return 'bento-square';
+    return 'bento-landscape';
+  }
+  switch (shapeClass) {
+    case 'bento-shape-tall':
+      return 'bento-tall';
+    case 'bento-shape-square':
+      return 'bento-square';
+    case 'bento-shape-landscape':
+      return 'bento-landscape';
+    case 'bento-shape-wide':
+      return 'bento-cinematic';
+    case 'bento-shape-portrait':
+    default:
+      return 'bento-portrait';
+  }
+}
+
+function pickWeightedVariant(options, weights, seed) {
+  if (!Array.isArray(options) || !options.length) return '';
+  if (options.length === 1) return options[0];
+  const safeWeights = Array.isArray(weights) && weights.length === options.length
+    ? weights.map((w) => (Number.isFinite(w) && w > 0 ? w : 1))
+    : options.map(() => 1);
+  const total = safeWeights.reduce((sum, w) => sum + w, 0);
+  let cursor = seededRandom(seed) * total;
+  for (let i = 0; i < options.length; i += 1) {
+    cursor -= safeWeights[i];
+    if (cursor <= 0) return options[i];
+  }
+  return options[options.length - 1];
 }

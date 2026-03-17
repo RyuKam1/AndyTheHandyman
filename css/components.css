@@ -808,9 +808,8 @@
    ======================================== */
 
 .bento-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-md);
+  column-count: 1;
+  column-gap: var(--space-md);
   padding-bottom: var(--space-2xl);
 }
 
@@ -822,8 +821,14 @@
   border: 1px solid var(--color-border-light);
   transition: all var(--transition-base);
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
+  --bento-card-width: 100%;
+  width: var(--bento-card-width);
+  margin-inline: auto;
+  margin: 0 0 var(--space-md);
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
 }
 
 .bento-card:hover {
@@ -836,11 +841,12 @@
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
+  aspect-ratio: 4 / 5;
 }
 
 .bento-card-img {
   width: 100%;
-  aspect-ratio: 16 / 10;
+  height: 100%;
   object-fit: cover;
   transition: transform var(--transition-slow);
 }
@@ -879,7 +885,7 @@
   line-height: var(--lh-normal);
   margin-bottom: var(--space-md);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex: 1;
@@ -896,11 +902,16 @@
 
 /* -- Bento large card (spans 2 cols on desktop) -- */
 .bento-card-large {
-  grid-column: span 1;
+  border-width: 1.5px;
+  box-shadow: var(--shadow-md);
 }
 
 .bento-card-large .bento-card-title {
   font-size: var(--fs-lg);
+}
+
+.bento-card-large .bento-card-image-wrapper {
+  aspect-ratio: 16 / 9;
 }
 
 .bento-card-large .bento-card-excerpt {
@@ -909,7 +920,78 @@
 
 /* -- Bento horizontal layout (for larger cards) -- */
 .bento-card-horizontal {
-  grid-column: span 1;
+  border-color: color-mix(in srgb, var(--color-border) 75%, transparent);
+}
+
+.bento-card-horizontal .bento-card-image-wrapper {
+  aspect-ratio: 16 / 9;
+}
+
+.bento-card-large,
+.bento-card-horizontal {
+  --bento-card-width: 100%;
+}
+
+/* -- Randomized shape presets (assigned in JS per session) -- */
+.bento-shape-portrait .bento-card-image-wrapper {
+  aspect-ratio: 4 / 5;
+}
+
+.bento-shape-portrait {
+  --bento-card-width: 100%;
+}
+
+.bento-shape-tall .bento-card-image-wrapper {
+  aspect-ratio: 3 / 4;
+}
+
+.bento-shape-tall {
+  --bento-card-width: 100%;
+}
+
+.bento-shape-square .bento-card-image-wrapper {
+  aspect-ratio: 1 / 1;
+}
+
+.bento-shape-square {
+  --bento-card-width: 100%;
+}
+
+.bento-shape-landscape .bento-card-image-wrapper {
+  aspect-ratio: 16 / 10;
+}
+
+.bento-shape-landscape {
+  --bento-card-width: 100%;
+}
+
+.bento-shape-wide .bento-card-image-wrapper {
+  aspect-ratio: 21 / 9;
+}
+
+.bento-shape-wide {
+  --bento-card-width: 100%;
+}
+
+/* -- Style presets for "designer imagination" cards -- */
+.bento-style-soft {
+  border-color: color-mix(in srgb, var(--color-primary) 26%, var(--color-border-light));
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--color-primary) 13%, transparent);
+}
+
+.bento-style-clean {
+  border-color: color-mix(in srgb, var(--color-border) 72%, transparent);
+}
+
+.bento-style-pop {
+  border-color: color-mix(in srgb, var(--color-accent) 32%, var(--color-border-light));
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--color-accent) 14%, transparent);
+}
+
+.bento-shape-landscape .bento-card-excerpt,
+.bento-shape-wide .bento-card-excerpt,
+.bento-card-horizontal .bento-card-excerpt {
+  -webkit-line-clamp: 4;
 }
 
 /* ---- Footer ---- */
@@ -1074,34 +1156,7 @@
 
 @media (min-width: 640px) {
   .bento-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .bento-card-large {
-    grid-column: span 2;
-  }
-
-  .bento-card-large .bento-card-img {
-    aspect-ratio: 21 / 9;
-  }
-
-  .bento-card-horizontal {
-    grid-column: span 2;
-    flex-direction: row;
-  }
-
-  .bento-card-horizontal .bento-card-image-wrapper {
-    width: 45%;
-    flex-shrink: 0;
-  }
-
-  .bento-card-horizontal .bento-card-img {
-    aspect-ratio: auto;
-    height: 100%;
-  }
-
-  .bento-card-horizontal .bento-card-body {
-    justify-content: center;
+    column-count: 2;
   }
 
   .featured-title {
@@ -1273,7 +1328,7 @@
   }
 
   .bento-grid {
-    gap: var(--space-sm);
+    column-gap: var(--space-sm);
   }
 
   .bento-card {
@@ -1281,7 +1336,7 @@
   }
 
   .bento-card-img {
-    aspect-ratio: 16 / 9;
+    height: 100%;
   }
 
   .bento-card-body {
@@ -1355,14 +1410,12 @@
 
 @media (min-width: 1024px) {
   .bento-grid {
-    grid-template-columns: repeat(3, 1fr);
+    column-count: 3;
   }
+}
 
-  .bento-card-large {
-    grid-column: span 2;
-  }
-
-  .bento-card-horizontal {
-    grid-column: span 2;
+@media (min-width: 1400px) {
+  .bento-grid {
+    column-count: 4;
   }
 }

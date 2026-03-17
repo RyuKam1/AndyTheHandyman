@@ -1009,26 +1009,16 @@ function initEditor() {
     );
   }
 
-  function getSelectedVariantMap() {
-    const root =
-      postData.coverImageVariants && typeof postData.coverImageVariants === "object"
-        ? postData.coverImageVariants
-        : {};
-    const selectedId = getSelectedCoverId();
-    if (!selectedId) return {};
-    const map = root[selectedId];
-    return map && typeof map === "object" ? map : {};
-  }
-
   function getSelectedCropMap() {
     const root =
       postData.coverImageCrops && typeof postData.coverImageCrops === "object"
         ? postData.coverImageCrops
         : {};
     const selectedId = getSelectedCoverId();
-    if (!selectedId) return {};
-    const map = root[selectedId];
-    if (map && typeof map === "object") return map;
+    if (selectedId) {
+      const map = root[selectedId];
+      if (map && typeof map === "object") return map;
+    }
     return {};
   }
 
@@ -1644,27 +1634,54 @@ function initEditor() {
             offsetYPct: Math.min(120, Math.max(-120, offsetYPct)),
           };
         };
+        const isMeaningfulCrop = (crop) => {
+          if (!crop || typeof crop !== "object") return false;
+          const zoom = Number(crop.zoom);
+          const x = Number(crop.offsetXPct);
+          const y = Number(crop.offsetYPct);
+          const zoomDelta = Number.isFinite(zoom) ? Math.abs(zoom - 1) : 0;
+          const xDelta = Number.isFinite(x) ? Math.abs(x) : 0;
+          const yDelta = Number.isFinite(y) ? Math.abs(y) : 0;
+          return zoomDelta > 0.015 || xDelta > 0.2 || yDelta > 0.2;
+        };
 
         if (!postData.coverImageCrops || typeof postData.coverImageCrops !== "object") {
           postData.coverImageCrops = {};
         }
         const selectedId = getSelectedCoverId();
-        if (selectedId) {
-          if (!postData.coverImageCrops[selectedId] || typeof postData.coverImageCrops[selectedId] !== "object") {
-            postData.coverImageCrops[selectedId] = {};
-          }
-          Object.entries(coverCropStatesByRatio || {}).forEach(([ratioKey, state]) => {
-            if (!COVER_RATIOS[ratioKey]) return;
-            if (ratioKey === "ratio-custom" && !postData.coverImageCustomEnabled) return;
-            postData.coverImageCrops[selectedId][ratioKey] = toCropSetting(ratioKey, state);
-          });
-        } else {
-          Object.entries(coverCropStatesByRatio || {}).forEach(([ratioKey, state]) => {
-            if (!COVER_RATIOS[ratioKey]) return;
-            if (ratioKey === "ratio-custom" && !postData.coverImageCustomEnabled) return;
-            postData.coverImageCrops[ratioKey] = toCropSetting(ratioKey, state);
-          });
+        if (!selectedId) {
+          showToast("❌ Select a cover image before applying crop.");
+          return;
         }
+        if (!postData.coverImageCrops[selectedId] || typeof postData.coverImageCrops[selectedId] !== "object") {
+          postData.coverImageCrops[selectedId] = {};
+        }
+        const existingMap = postData.coverImageCrops[selectedId] && typeof postData.coverImageCrops[selectedId] === "object"
+          ? postData.coverImageCrops[selectedId]
+          : {};
+        const nextMap = {};
+        Object.entries(coverCropStatesByRatio || {}).forEach(([ratioKey, state]) => {
+          if (!COVER_RATIOS[ratioKey]) return;
+          if (ratioKey === "ratio-custom" && !postData.coverImageCustomEnabled) return;
+          const normalizedCrop = toCropSetting(ratioKey, state);
+          if (isMeaningfulCrop(normalizedCrop)) {
+            nextMap[ratioKey] = normalizedCrop;
+          }
+        });
+        Object.entries(existingMap).forEach(([ratioKey, crop]) => {
+          if (!COVER_RATIOS[ratioKey]) return;
+          if (ratioKey === "ratio-custom" && !postData.coverImageCustomEnabled) return;
+          if (nextMap[ratioKey]) return;
+          if (!crop || typeof crop !== "object") return;
+          if (isMeaningfulCrop(crop)) {
+            nextMap[ratioKey] = {
+              zoom: Number(crop.zoom) || 1,
+              offsetXPct: Number(crop.offsetXPct) || 0,
+              offsetYPct: Number(crop.offsetYPct) || 0,
+            };
+          }
+        });
+        postData.coverImageCrops[selectedId] = nextMap;
 
         const selectedItem = (postData.coverImageLibrary || []).find(
           (item) => item?.id === selectedId,
@@ -2315,9 +2332,6 @@ function initEditor() {
       null;
     const previewCover =
       selectedCoverEntry?.src ||
-      getSelectedVariantMap()?.[postRatio] ||
-      getSelectedVariantMap()?.["ratio-21-9"] ||
-      getSelectedVariantMap()?.["ratio-16-9"] ||
       postData.coverImage ||
       coverImageSource;
 
@@ -2734,7 +2748,15 @@ function buildJSON() {
 
 function buildPublishPayload() {
   const payload = buildJSON();
-  payload.coverImageVariants = compactCoverImageVariantsForPublish(payload);
+  payload.coverImageSelected = resolveSelectedIdForPayload(payload);
+  if (!payload.coverImage && Array.isArray(payload.coverImageLibrary) && payload.coverImageSelected) {
+    const selectedItem = payload.coverImageLibrary.find(
+      (item) => item?.id === payload.coverImageSelected && item?.src,
+    );
+    if (selectedItem?.src) payload.coverImage = selectedItem.src;
+  }
+  payload.coverImageCrops = canonicalizeCoverCropsForSelected(payload);
+  payload.coverImageVariants = {};
   if (Array.isArray(payload.coverImageLibrary) && payload.coverImageSelected) {
     const selectedItem = payload.coverImageLibrary.find(
       (item) => item?.id === payload.coverImageSelected && item?.src,
@@ -2745,72 +2767,40 @@ function buildPublishPayload() {
   return payload;
 }
 
-function compactCoverImageVariantsForPublish(payload) {
-  const source =
-    payload?.coverImageVariants && typeof payload.coverImageVariants === "object"
-      ? payload.coverImageVariants
+function canonicalizeCoverCropsForSelected(payload) {
+  const root =
+    payload?.coverImageCrops && typeof payload.coverImageCrops === "object"
+      ? payload.coverImageCrops
       : {};
-  const hasAnyCropData = (() => {
-    const root =
-      payload?.coverImageCrops && typeof payload.coverImageCrops === "object"
-        ? payload.coverImageCrops
-        : {};
-    const entries = Object.entries(root);
-    if (!entries.length) return false;
-    const directMode = entries.some(
-      ([key, value]) =>
-        key.startsWith("ratio-") && value && typeof value === "object",
-    );
-    if (directMode) return true;
-    return entries.some(
-      ([, value]) =>
-        value &&
-        typeof value === "object" &&
-        Object.keys(value).some((key) => key.startsWith("ratio-")),
-    );
-  })();
-  if (hasAnyCropData) {
-    return {};
-  }
-  const keepKeys = new Set(
-    [
-      "ratio-16-9",
-      "ratio-21-9",
-      payload?.coverImagePostRatio,
-      ...(Array.isArray(payload?.coverImageDisplayRatios)
-        ? payload.coverImageDisplayRatios
-        : []),
-    ].filter((key) => typeof key === "string" && key && key !== "ratio-custom"),
-  );
-  if (payload?.coverImageCustomEnabled) {
-    keepKeys.add("ratio-custom");
-  }
-
-  const pickMap = (map) => {
-    const out = {};
-    if (!map || typeof map !== "object") return out;
-    for (const key of keepKeys) {
-      const value = map[key];
-      if (typeof value === "string" && value.trim()) {
-        out[key] = value;
-      }
-    }
-    return out;
-  };
-
   const selectedId =
     typeof payload?.coverImageSelected === "string"
-      ? payload.coverImageSelected
+      ? payload.coverImageSelected.trim()
       : "";
-  if (
-    selectedId &&
-    source[selectedId] &&
-    typeof source[selectedId] === "object"
-  ) {
-    return { [selectedId]: pickMap(source[selectedId]) };
-  }
+  const direct = Object.fromEntries(
+    Object.entries(root).filter(
+      ([key, value]) =>
+        key.startsWith("ratio-") && value && typeof value === "object",
+    ),
+  );
+  if (!selectedId) return {};
+  const selectedMap =
+    root[selectedId] && typeof root[selectedId] === "object"
+      ? root[selectedId]
+      : {};
+  const merged = { ...direct, ...selectedMap };
+  return Object.keys(merged).length ? { [selectedId]: merged } : {};
+}
 
-  return pickMap(source);
+function resolveSelectedIdForPayload(payload) {
+  const selected = typeof payload?.coverImageSelected === "string"
+    ? payload.coverImageSelected.trim()
+    : "";
+  if (selected) return selected;
+  if (!Array.isArray(payload?.coverImageLibrary)) return "";
+  const first = payload.coverImageLibrary.find(
+    (item) => typeof item?.id === "string" && item.id.trim(),
+  );
+  return first?.id ? String(first.id).trim() : "";
 }
 
 function createBlock(type) {

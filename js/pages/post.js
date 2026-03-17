@@ -38,7 +38,6 @@ export async function renderPostPage(params) {
 
   const date = formatDate(post.date);
   const time = readingTime(post.content || []);
-  const variants = getVariantMap(post);
   const crops = getCropMap(post);
   const heroRatio = post.coverImageCustomEnabled
     ? "ratio-custom"
@@ -55,12 +54,6 @@ export async function renderPostPage(params) {
     null;
   const selectedLibraryImage = resolveSelectedLibraryImage(post);
   const heroImage =
-    (selectedLibraryImage && heroCrop
-      ? selectedLibraryImage
-      : "") ||
-    variants?.[heroRatio] ||
-    variants?.["ratio-21-9"] ||
-    variants?.["ratio-16-9"] ||
     selectedLibraryImage ||
     post.coverImage;
 
@@ -159,37 +152,45 @@ function resolveSelectedLibraryImage(post) {
   return typeof fallback?.src === "string" ? fallback.src : "";
 }
 
-function getVariantMap(post) {
-  const root = post?.coverImageVariants && typeof post.coverImageVariants === "object"
-    ? post.coverImageVariants
-    : {};
-  const selected = typeof post?.coverImageSelected === "string" ? post.coverImageSelected : "";
-  if (selected && root[selected] && typeof root[selected] === "object") {
-    return root[selected];
-  }
-  const firstNested = Object.values(root).find(
-    (value) => value && typeof value === "object" && !Array.isArray(value),
+function getResolvedCoverId(post) {
+  const selected = typeof post?.coverImageSelected === "string" ? post.coverImageSelected.trim() : "";
+  if (selected) return selected;
+  if (!Array.isArray(post?.coverImageLibrary)) return "";
+  return typeof post.coverImageLibrary[0]?.id === "string"
+    ? post.coverImageLibrary[0].id.trim()
+    : "";
+}
+
+function normalizeCropMap(map) {
+  if (!map || typeof map !== "object") return {};
+  return Object.fromEntries(
+    Object.entries(map).filter(([key, value]) =>
+      key !== "ratio-custom" && key.startsWith("ratio-") && value && typeof value === "object",
+    ),
   );
-  if (firstNested) return firstNested;
-  return root;
+}
+
+function getFirstCropMap(root) {
+  if (!root || typeof root !== "object") return {};
+  const nestedEntries = Object.entries(root).filter(
+    ([key, value]) => !key.startsWith("ratio-") && value && typeof value === "object",
+  );
+  if (nestedEntries.length === 1) {
+    return nestedEntries[0][1];
+  }
+  return {};
 }
 
 function getCropMap(post) {
   const root = post?.coverImageCrops && typeof post.coverImageCrops === "object"
     ? post.coverImageCrops
     : {};
-  const selected = typeof post?.coverImageSelected === "string" ? post.coverImageSelected : "";
+  const selected = getResolvedCoverId(post);
   if (selected && root[selected] && typeof root[selected] === "object") {
-    return root[selected];
+    return normalizeCropMap(root[selected]);
   }
-  const firstNested = Object.values(root).find(
-    (value) => value && typeof value === "object" && !Array.isArray(value),
-  );
-  if (firstNested) return firstNested;
-  const directKeys = Object.keys(root);
-  const hasDirectRatio = directKeys.some((k) => k.startsWith("ratio-") && typeof root[k] === "object");
-  if (hasDirectRatio) return root;
-  return {};
+  const first = getFirstCropMap(root);
+  return normalizeCropMap(first);
 }
 
 function toHeroRatioClass(ratioKey) {
